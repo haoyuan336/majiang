@@ -1,0 +1,36 @@
+{
+  "ver": "2.3.4",
+  "uuid": "013a8c02-b8ab-4f47-89ea-675ab0313df0",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 340,
+  "height": 439,
+  "platformSettings": {},
+  "subMetas": {
+    "roomcreate_huzi": {
+      "ver": "1.0.4",
+      "uuid": "f15aa056-3238-434b-a6e0-1a78e0a5b8ad",
+      "rawTextureUuid": "013a8c02-b8ab-4f47-89ea-675ab0313df0",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 1,
+      "trimY": 0,
+      "width": 338,
+      "height": 439,
+      "rawWidth": 340,
+      "rawHeight": 439,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
