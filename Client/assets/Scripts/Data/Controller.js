@@ -5,6 +5,7 @@ class Controller {
     }
     setMainNode(node){
         this._mainNode = node;
+        this._mainNode.emit("enter-login-layer");
 
     }   
 }
