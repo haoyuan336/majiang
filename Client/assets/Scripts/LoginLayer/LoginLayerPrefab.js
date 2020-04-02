@@ -27,7 +27,14 @@ cc.Class({
                 )
             )
         )
-        global.socketController.connectToServer();
+        global.controller.showWaitAlert(true);
+        global.socketController.connectToServer().then(() => {
+            console.log("链接成功");
+            return global.socketController.login(global.controller.getId());
+        }).then(() => {
+            global.controller.showWaitAlert(false);
+
+        });
     },
     onButtonClick(event, customData) {
         console.log("click ", customData);

@@ -171,7 +171,7 @@
       "array": [
         0,
         0,
-        434.74477912878615,
+        429.33125994442344,
         0,
         0,
         0,
@@ -257,6 +257,9 @@
     "_enabled": true,
     "loginLayerPrefab": {
       "__uuid__": "cd407eb8-2a3c-490b-b942-47aa4549b4b7"
+    },
+    "waitAlertPrefab": {
+      "__uuid__": "001fd013-9672-40be-9350-ebf1c617e58f"
     },
     "_id": "30pM47vfJEBY1SBsuTKKiw"
   },
