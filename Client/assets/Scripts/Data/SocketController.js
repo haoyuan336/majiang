@@ -12,9 +12,8 @@ class SocketController {
                 console.log("链接成功");
                 resole();
             }
-            connent.onmessage = (text) => {
-                console.log("收到服务器消息", text);
-                this.processMessage(text);
+            connent.onmessage = (message) => {
+                this.processMessage(JSON.parse(message.data));
             }
             connent.onerror = (err) => {
                 console.log("链接错误", err);
@@ -24,8 +23,21 @@ class SocketController {
         });
 
     }
-    processMessage(data) {
-        console.log("处理消息", data);
+    processMessage(spec) {
+        console.log("处理消息", spec);
+        let type = spec.type;
+        let data = spec.data;
+        let callBackId = spec.callBackId;
+        console.log("call back id", callBackId);
+        console.log("call map", this._callBackMap);
+        if (this._callBackMap[callBackId]) {
+            console.log("存在回调");
+            let cb = this._callBackMap[callBackId];
+            if (cb) {
+                cb(data);
+            }
+            delete this._callBackMap[callBackId];
+        }
     }
     login(id) {
         return new Promise((resole, reject) => {
@@ -39,6 +51,11 @@ class SocketController {
     sendCreateRoomMessage(data) {
         return new Promise((resole, reject) => {
             this.sendMessage("create-room", data, resole);
+        });
+    }
+    sendJoinRoomMessage(roomId) {
+        return new Promise((resole) => {
+            this.sendMessage("join-room", { roomId: roomId }, resole);
         });
     }
     sendMessage(type, data, callBack) {

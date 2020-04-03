@@ -14,6 +14,9 @@ class Controller {
     showWaitAlert(value){
         this._mainNode.emit("show-wait-alert", value);
     }
+    showAlert(text){
+        this._mainNode.emit("show-alert", text);
+    }
     getQueryVariable(type) {
         var query = window.location.search.substring(1);
         var vars = query.split("&");

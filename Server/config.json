@@ -1,0 +1,20 @@
+{
+    "round-type": {
+        "round-count-type-1": 10,
+        "round-count-type-2": 20
+    },
+    "round-type-house-card-cost": {
+        "round-count-type-1": 1,
+        "round-count-type-2": 2
+    },
+    "rate-type": {
+        "rate-type-1": {
+            "hu": 1,
+            "gang": 2
+        },
+        "rate-type-2": {
+            "hu": 2,
+            "gang": 4
+        }
+    }
+}

@@ -171,7 +171,7 @@
       "array": [
         0,
         0,
-        429.33125994442344,
+        434.74477912878615,
         0,
         0,
         0,
@@ -260,6 +260,9 @@
     },
     "waitAlertPrefab": {
       "__uuid__": "001fd013-9672-40be-9350-ebf1c617e58f"
+    },
+    "alertNodePrefab": {
+      "__uuid__": "33c88ee6-f8e3-43a8-9742-f1b6404aae11"
     },
     "_id": "30pM47vfJEBY1SBsuTKKiw"
   },

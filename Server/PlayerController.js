@@ -1,21 +1,27 @@
 const Player = require("./Player");
 class PlayerController {
-    constructor(db){
+    constructor(db, roomController) {
         this._db = db;
         this._playerList = [];
+        this._roomController = roomController;
     }
-    playerLogin(data, client){
+    getRoomController() {
+        return this._roomController;
+    }
+    playerLogin(data, client) {
+        console.log("player login", JSON.stringify(data));
         let id = data.id;
-        for (let i = 0 ; i < this._playerList.length ; i ++){
+        for (let i = 0; i < this._playerList.length; i++) {
             let player = this._playerList[i];
-            if (player.getId() === id){
+            if (player.getId() === id) {
                 player.reLogin(data, client);
                 return;
             }
         }
-        let player = new Player(this._db);
-        player.login(data, client);
-        this._playerList.push(player);
+        let player = new Player(this._db, this);
+        player.login(data, client).then(() => {
+            this._playerList.push(player);
+        })
 
     }
 }

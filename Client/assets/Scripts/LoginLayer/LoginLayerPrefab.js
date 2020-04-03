@@ -14,6 +14,7 @@ cc.Class({
         node.parent = this.node;
         node.x = screenView.width * - 0.5 + 100;
         node.y = screenView.height * 0.5 - 100;
+        this._playerNode = node;
     },
     start() {
         this.healthGameTips.x = 1000;
@@ -30,7 +31,16 @@ cc.Class({
         global.controller.showWaitAlert(true);
         global.socketController.connectToServer().then(() => {
             console.log("链接成功");
-            return global.socketController.login(global.controller.getId());
+            return global.socketController.login(global.controller.getId()).then((data) => {
+                // console.log("登录", data);
+                if (data.err) {
+                    global.controller.showAlert(data.err)
+                } else {
+                    console.log("登录成功", data);
+                    this._playerNode.emit("update-info", data);
+                }
+
+            });
         }).then(() => {
             global.controller.showWaitAlert(false);
 

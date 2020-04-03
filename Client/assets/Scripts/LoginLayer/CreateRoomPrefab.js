@@ -24,7 +24,17 @@ cc.Class({
                     'rate-type': this._rateType
                 }
                 console.log("data", data);
-                global.socketController.sendCreateRoomMessage(data);
+                global.controller.showWaitAlert(true);
+                global.socketController.sendCreateRoomMessage(data).then((spec) => {
+                    global.controller.showWaitAlert(false);
+                    let state = spec.state;
+                    let roomId = spec.roomId;
+                    console.log("创建房间", spec);
+                    return global.socketController.sendJoinRoomMessage(roomId);
+
+                }).then((data) => {
+                    console.log("进入房间成功", data);
+                });
                 break;
             default:
                 break;
