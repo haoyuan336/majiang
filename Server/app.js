@@ -1,5 +1,8 @@
 const WebSocket = require("nodejs-websocket");
-let playerController = require("./PlayerController")();
+let PC = require("./PlayerController");
+let DBController = require("./DBController");
+let db = new DBController();
+let playerController = new PC(db);
 class App{
     constructor(){
         console.log("启动");

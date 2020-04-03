@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "mysql": "^2.18.1",
     "nodejs-websocket": "^1.7.2",
     "websocket-nodejs": "^1.0.0"
   }
