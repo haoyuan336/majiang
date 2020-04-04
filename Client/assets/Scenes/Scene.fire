@@ -171,7 +171,7 @@
       "array": [
         0,
         0,
-        434.74477912878615,
+        433.87875372500173,
         0,
         0,
         0,
@@ -263,6 +263,9 @@
     },
     "alertNodePrefab": {
       "__uuid__": "33c88ee6-f8e3-43a8-9742-f1b6404aae11"
+    },
+    "gameLayerPrefab": {
+      "__uuid__": "02458ea0-02f1-4a07-8bd1-734eba12ea16"
     },
     "_id": "30pM47vfJEBY1SBsuTKKiw"
   },

@@ -17,6 +17,12 @@ class Controller {
     showAlert(text){
         this._mainNode.emit("show-alert", text);
     }
+    enterGameLayer(){
+        this._mainNode.emit("enter-game-layer");
+    }
+    enterLoginLayer(){
+        this._mainNode.emit("enter-login-layer");
+    }
     getQueryVariable(type) {
         var query = window.location.search.substring(1);
         var vars = query.split("&");

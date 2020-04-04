@@ -3517,7 +3517,7 @@
     "component": "",
     "_componentId": "0fae6dGiiFE6qt6ZCvz8VBq",
     "handler": "onButtonClick",
-    "customEventData": "rule-type-1"
+    "customEventData": "rule-type-2"
   },
   {
     "__type__": "cc.PrefabInfo",

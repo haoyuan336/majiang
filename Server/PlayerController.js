@@ -10,10 +10,13 @@ class PlayerController {
     }
     playerLogin(data, client) {
         console.log("player login", JSON.stringify(data));
-        let id = data.id;
+        let id = data.data;
         for (let i = 0; i < this._playerList.length; i++) {
             let player = this._playerList[i];
-            if (player.getId() === id) {
+            console.log("id", id);
+            console.log("player id = ", player.getId());
+            if (player.getId() == id) {
+                console.log("找到了玩家");
                 player.reLogin(data, client);
                 return;
             }

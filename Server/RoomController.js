@@ -8,8 +8,6 @@ class RoomController {
         console.log("创建房间", JSON.stringify(config));
         console.log("data", JSON.stringify(data));
         let roundType = data['round-type'];
-        let ruleType = data['rule-type'];
-        let rateType = data['rate-type'];
         let costCount = config['round-type-house-card-cost'][roundType];
         console.log("消耗的房卡数是", costCount);
         let playerHouseCardCount = player.getHouseCardCount();
@@ -19,7 +17,7 @@ class RoomController {
             }
         } else {
             let newRoomId = this.getNewRoomId();
-            let room = new Room(newRoomId);
+            let room = new Room(newRoomId, data);
             this._roomList.push(room);
             if (cb) {
                 cb(room);
@@ -30,19 +28,26 @@ class RoomController {
         let targetRoom = undefined;
         for (let i = 0; i < this._roomList.length; i++) {
             let room = this._roomList[i];
-            if (room.getId() === roomId) {
+            if (room.getId() == roomId) {
                 //找到了房间
                 targetRoom = room;
                 break;
             }
         }
-        if (targetRoom){
-            if (cb){
-                cb(targetRoom)
+        if (targetRoom) {
+            let isCanJoin = targetRoom.getIsCanJoin(player.getId());
+            if (isCanJoin !== true) {
+                if (cb) {
+                    cb({ err: isCanJoin });
+                }
+            } else {
+                if (cb) {
+                    cb(targetRoom)
+                }
             }
-        }else{
-            if (cb){
-                cb({err:"未找到房间"});
+        } else {
+            if (cb) {
+                cb({ err: "未找到房间" });
             }
         }
     }

@@ -6,7 +6,8 @@ cc.Class({
     properties: {
         loginLayerPrefab: cc.Prefab,
         waitAlertPrefab: cc.Prefab,
-        alertNodePrefab: cc.Prefab
+        alertNodePrefab: cc.Prefab,
+        gameLayerPrefab: cc.Prefab
     },
     onLoad() {
         this._currentLayerNode = undefined;
@@ -30,16 +31,24 @@ cc.Class({
             node.parent = this.node;
             node.emit("set-text", text);
         });
+        this.node.on("enter-game-layer", () => {
+            this.enterNewLayer(this.gameLayerPrefab);
+        });
     },
     enterNewLayer(prefab) {
+        console.log("enter new layer");
         let node = cc.instantiate(prefab);
         node.parent = this.node;
+        if (cc.isValid(this._currentLayerNode)) {
+            let view = cc.view.getVisibleSize();
+            node.x = view.width;
+            node.runAction(cc.sequence(cc.moveTo(0.4, 0, 0), cc.callFunc(() => {
+                this._currentLayerNode.destroy();
+                this._currentLayerNode = node;
 
-        if (this._currentLayerNode || cc.isValid(this._currentLayerNode)) {
-            this._currentLayerNode.destroy();
-            this._currentLayerNode = this.node;
+            })));
         } else {
-            this._currentLayerNode = this.node;
+            this._currentLayerNode = node;
         }
     },
 

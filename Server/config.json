@@ -16,5 +16,9 @@
             "hu": 2,
             "gang": 4
         }
+    },
+    "rule-name": {
+        "rule-type-1": "胡吃乱碰",
+        "rule-type-2": "只碰不吃"
     }
 }

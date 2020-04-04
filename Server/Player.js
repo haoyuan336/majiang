@@ -1,3 +1,4 @@
+const State = require("./State")
 class Player {
     constructor(db, controller) {
         this._id = "000000";
@@ -5,6 +6,11 @@ class Player {
         this._houseCardCount = 0;
         this._db = db;
         this._controller = controller;
+        this._totalScore = 0;
+        this._currentScore = 0;
+        this._isHouseMaster = false;
+        this._state = new State();
+        this._state.setState('wait');
     }
     getId() {
         return this._id;
@@ -14,8 +20,8 @@ class Player {
         let id = data.data;
         let callBackId = data.callBackId;
         this._client = client;
+        this._id = id;
         return this._db.getPlayerInfo(id).then((data) => {
-            this._id = id;
             this._nickName = data.nickname;
             this._houseCardCount = data.housecardcount;
             this._headImageUrl = data.headimageurl;
@@ -33,11 +39,30 @@ class Player {
     }
     reLogin(data, client) {
         let callBackId = data.callBackId;
+        this._client = client;
+        let roomId = 0;
+        if (this._room) {
+            roomId = this._room.getId();
+        }
+        this.sendMessage("login-success", {
+            id: this._id,
+            nickName: this._nickName,
+            houseCardCount: this._houseCardCount,
+            headImageUrl: this._headImageUrl,
+            roomId: roomId
+        }, callBackId);
         this.registerEvent(client);
+
+        if (this._room) {
+            //还在房间里面
+
+        }
     }
     registerEvent(client) {
         client.on("close", () => {
-
+            // if (this._room) {
+            //     this._room.playerExit(this);
+            // }
         });
         client.on("text", (data) => {
             this.processMessage(JSON.parse(data));
@@ -63,6 +88,7 @@ class Player {
                 break;
             case 'join-room':
                 let roomId = data.roomId;
+                console.log("room id", roomId);
                 this._controller.getRoomController().playerJoinRoom(this, roomId, (cbdata) => {
                     if (cbdata.err) {
                         this.sendMessage("join-fail", { err: cbdata.err }, callBackId);
@@ -72,6 +98,39 @@ class Player {
                     }
                 });
                 break;
+            case 'exit-room':
+                if (this._room) {
+                    let result = this._room.playerExit(this);
+                    if (result === 'success') {
+                        this._room = undefined;
+                        this.sendMessage('exit-success', result, callBackId);
+                    } else {
+                        this.sendMessage('exit-fail', { err: result }, callBackId);
+                    }
+                } else {
+                    this.sendMessage('exit-fail', { err: "未在房间里" }, callBackId);
+                }
+                break;
+            case 'enter-room-layer-success':
+                if (this._room) {
+                    this._room.playerEnterGameLayer(this).then((data) => {
+                        this.sendMessage("enter-success", data, callBackId)
+                    }).catch((err) => {
+                        this.sendMessage("enter-fail", { err: err }, callBackId);
+                    });
+                }
+                break;
+            case 'start-game':
+                //开始游戏
+                if (this._room) {
+                    let result = this._room.houseMasterStartGame(this);
+                    if (result === true) {
+                        this.sendMessage("success", "", callBackId);
+                    } else {
+                        this.sendMessage("fail", { err: result }, callBackId);
+                    }
+                }
+                break;
             default:
                 break;
         }
@@ -79,6 +138,31 @@ class Player {
     getHouseCardCount() {
         return this._houseCardCount;
     }
+    roomStartGame(){
+        this._state.setState("start-game");
+        this.sendMessage("sync-state", this._state.getState(), 0);
+    }
+    getPlayerInfo() {
+        return {
+            id: this._id,
+            nickName: this._nickName,
+            headImageUrl: this._headImageUrl,
+            totalScore: this._totalScore,
+            currentScore: this._currentScore,
+            isHouseMaster: this._isHouseMaster,
+            state: this._state.getState()
+        }
+    }
+    sendSyncAllPlayerInfo(info) {
+        this.sendMessage("sync-all-player-info", info, 0);
+    }
+    setHouseMaster(value) {
+        this._isHouseMaster = value;
+    }
+    getIsHouseMaster() {
+        return this._isHouseMaster;
+    }
+  
     sendMessage(type, data, callBackId) {
         let str = JSON.stringify({
             type: type,

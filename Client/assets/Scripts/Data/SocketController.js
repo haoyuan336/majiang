@@ -23,6 +23,12 @@ class SocketController {
         });
 
     }
+    onSyncAllPlayerInfo(data) {
+        console.warn("on sync all player info", data);
+    }
+    onSyncState(state) {
+        console.warn("on sync state", state);
+    }
     processMessage(spec) {
         console.log("处理消息", spec);
         let type = spec.type;
@@ -37,6 +43,16 @@ class SocketController {
                 cb(data);
             }
             delete this._callBackMap[callBackId];
+        }
+        switch (type) {
+            case 'sync-all-player-info':
+                this.onSyncAllPlayerInfo(data);
+                break;
+            case 'sync-state':
+                this.onSyncState(data);
+                break;
+            default:
+                break
         }
     }
     login(id) {
@@ -56,6 +72,21 @@ class SocketController {
     sendJoinRoomMessage(roomId) {
         return new Promise((resole) => {
             this.sendMessage("join-room", { roomId: roomId }, resole);
+        });
+    }
+    sendEnterRoomLayer() {
+        return new Promise((resole) => {
+            this.sendMessage("enter-room-layer-success", "", resole);
+        });
+    }
+    sendStartGameMessage() {
+        return new Promise((resole, reject) => {
+            this.sendMessage("start-game", "", resole);
+        })
+    }
+    sendExitRoomtMessage() {
+        return new Promise((resole, reject) => {
+            this.sendMessage("exit-room", "", resole);
         });
     }
     sendMessage(type, data, callBack) {

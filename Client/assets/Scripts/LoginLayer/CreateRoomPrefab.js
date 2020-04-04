@@ -34,6 +34,7 @@ cc.Class({
 
                 }).then((data) => {
                     console.log("进入房间成功", data);
+                    global.controller.enterGameLayer();
                 });
                 break;
             default:
@@ -45,7 +46,7 @@ cc.Class({
         if (customData.indexOf("rule-type") > -1) {
             this._ruleType = customData;
         }
-        if (customData.indexOf("rate-type-1") > -1) {
+        if (customData.indexOf("rate-type") > -1) {
             this._rateType = customData;
         }
     }

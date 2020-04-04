@@ -6,7 +6,8 @@ cc.Class({
     properties: {
         healthGameTips: cc.Node,
         playerNodePrefab: cc.Prefab,
-        createRoomPrefab: cc.Prefab
+        createRoomPrefab: cc.Prefab,
+        joinRoomPrefab: cc.Prefab
     },
     onLoad() {
         let screenView = cc.view.getVisibleSize();
@@ -37,7 +38,18 @@ cc.Class({
                     global.controller.showAlert(data.err)
                 } else {
                     console.log("登录成功", data);
-                    this._playerNode.emit("update-info", data);
+                    let roomId = data.roomId;
+                    if (roomId) {
+                        global.socketController.sendJoinRoomMessage(roomId).then((data) => {
+                            if (data.err) {
+                                global.controller.showAlert(data.err);
+                            } else {
+                                global.controller.enterGameLayer();
+                            }
+                        });
+                    } else {
+                        this._playerNode.emit("update-info", data);
+                    }
                 }
 
             });
@@ -52,6 +64,12 @@ cc.Class({
             case 'create-room':
                 this._createRoomNode = cc.instantiate(this.createRoomPrefab);
                 this._createRoomNode.parent = this.node;
+                break;
+            case 'join-room':
+                let joinRoomNode = cc.instantiate(this.joinRoomPrefab);
+                joinRoomNode.parent = this.node;
+                break;
+            default:
                 break;
         }
     }
