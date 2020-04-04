@@ -27,9 +27,7 @@ cc.Class({
                 this.backButton.active = false;
                 break;
             case 'wait':
-                if (this._isHouseMaster){
-                    this.startGameButton.active = true;
-                }
+                this.startGameButton.active = this._isHouseMaster;
                 this.backButton.active = true;
                 break;
             default:
@@ -63,17 +61,18 @@ cc.Class({
             let playerNode = this._playerNodeList[i];
             playerNode.emit("update-info", playersInfo[i], i, listIndex);
         }
-        let isHouseMaster = false;
-        this._isHouseMaster = isHouseMaster;
+        let state = '';
         for (let i = 0; i < playersInfo.length; i++) {
             let player = playersInfo[i];
             if (player.id === global.controller.getId()) {
-                isHouseMaster = player.isHouseMaster;
-                let state = player.state;
-                this.syncState(state);
-
+                this._isHouseMaster = player.isHouseMaster;
+                state = player.state;
             }
         }
+        console.log("state", state);
+        console.log('is house master', this._isHouseMaster);
+        this.syncState(state);
+
     },
     start() {
         global.socketController.sendEnterRoomLayer().then((data) => {

@@ -27,6 +27,7 @@ class Room {
             player.roomStartGame();
         }
         let onePackCards = this._cardController.getNewOnePackCards();
+        console.log("one pack card", onePackCards);
     }
     
     getId() {

@@ -15,15 +15,20 @@ class CardController {
                 }
             }
         }
-        let types2 = ['dong', 'xi','nan', 'bei','zhong','fa','bai'];
-        for (let j = 0 ; j < types2.length ; j ++){
-            for (let i = 0 ; i  < 4 ; i ++){
-                let card = new Card(types2[j]);
+        let types2 = ['dong', 'xi', 'nan', 'bei', 'zhong', 'fa', 'bai'];
+        for (let j = 0; j < types2.length; j++) {
+            for (let i = 0; i < 4; i++) {
+                let card = new Card(types2[j], 0);
                 cardlist.push(card);
             }
         }
         console.log("cards = ", JSON.stringify(cardlist));
         console.log("card length ", cardlist.length);
+        //洗牌
+        cardlist = cardlist.sort(() => {
+            return Math.random() - 0.5;
+        });
+        return cardlist;
     }
 }
 module.exports = CardController;
