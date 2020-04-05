@@ -1049,6 +1049,9 @@
     "backButton": {
       "__id__": 22
     },
+    "myCardLayerPrefab": {
+      "__uuid__": "7d513e76-da75-410f-b572-13c5e57e5f6d"
+    },
     "_id": ""
   },
   {

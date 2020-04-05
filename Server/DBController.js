@@ -19,7 +19,7 @@ class DBController {
                     resole(err)
                 }else{
                     if (data.length === 0){
-                        reject("无次用户");
+                        reject("无此用户");
                     }else{
                         resole(data[0]);
                     }

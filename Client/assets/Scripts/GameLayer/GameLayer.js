@@ -10,14 +10,27 @@ cc.Class({
         rountCountLabel: cc.Node,
         playerNodePrefab: cc.Prefab,
         startGameButton: cc.Node,
-        backButton: cc.Node
+        backButton: cc.Node,
+        myCardLayerPrefab: cc.Prefab
     },
     onLoad() {
         //进入房间成功
         this._playerNodeList = [];
         global.socketController.onSyncAllPlayerInfo = this.syncAllPlayerInfo.bind(this);
         global.socketController.onSyncState = this.syncState.bind(this);
-
+        global.socketController.onPushCard = this.showCards.bind(this);
+        this.myCardLayer = cc.instantiate(this.myCardLayerPrefab);
+        this.myCardLayer.parent = this.node;
+        this.myCardLayer.scale = 0.7;
+        this.myCardLayer.y = -160;
+    },
+    showCards(data){
+        console.log("显示牌", data);
+        let cardList = data.cardList;
+        for (let i = 0 ; i < cardList.length ; i ++){
+            this.myCardLayer.emit("push-card", cardList[i]);
+        }
+        // this.myCardLayer.emit("")
     },
     syncState(state) {
         console.log("同步房间状态", state);

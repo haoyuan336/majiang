@@ -29,6 +29,9 @@ class SocketController {
     onSyncState(state) {
         console.warn("on sync state", state);
     }
+    onPushCard(data){
+        console.warn("on push card", data);
+    }
     processMessage(spec) {
         console.log("处理消息", spec);
         let type = spec.type;
@@ -50,6 +53,9 @@ class SocketController {
                 break;
             case 'sync-state':
                 this.onSyncState(data);
+                break;
+            case 'push-card':
+                this.onPushCard(data);
                 break;
             default:
                 break

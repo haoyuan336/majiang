@@ -5,7 +5,8 @@ cc.Class({
         headImageNode: cc.Node,
         nickNameLabel: cc.Node,
         GameConfig: cc.JsonAsset,
-        houseMasterIcon: cc.Node
+        houseMasterIcon: cc.Node,
+        banckerIcon: cc.Node
     },
     onLoad() {
         this._playerSeatConfig = this.GameConfig.json['player-seat-config'];
@@ -24,7 +25,7 @@ cc.Class({
             this.node.x = this._playerSeatConfig[convertSeatIndex].x;
             this.node.y = this._playerSeatConfig[convertSeatIndex].y;
             this.houseMasterIcon.active = data.isHouseMaster;
-
+            this.banckerIcon.active = data.isBanker;
         });
     },
     updateHeadImage(headImageUrl) {

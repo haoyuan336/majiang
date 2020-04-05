@@ -18,21 +18,63 @@ class Room {
         this._state.setState('wait');
         this._state.addState("start-game", this.startGame.bind(this));
         this._cardController = new CardController();
+        this._bankerIndex = 0;
     }
     startGame() {
         console.log("开始游戏");
         //告诉所有的玩家开始游戏了
-        for (let i = 0 ; i < this._playerList.length ; i ++){
-            let player  =this._playerList[i];
+        for (let i = 0; i < this._playerList.length; i++) {
+            let player = this._playerList[i];
             player.roomStartGame();
         }
         let onePackCards = this._cardController.getNewOnePackCards();
         console.log("one pack card", onePackCards);
+        //拿到牌之后，开始发牌
+        //首先确定撞见
+        //
+        this.setBanker();
+        this._onePackCards = onePackCards;
+        this.pushCard();
     }
-    
+    pushCard() {
+        for (let i = 0; i < this._playerList.length; i++) {
+            let cardList = [];
+            let player = this._playerList[i];
+            for (let j = 0; j < 13; j++) {
+                cardList.push(this._onePackCards.pop());
+            }
+            player.pushCard(cardList);
+        }
+    }
+    setBanker() {
+        let bankerPlayer = undefined;
+        for (let i = 0; i < this._playerList.length; i++) {
+            let player = this._playerList[i];
+            if (player.getIsBanker()) {
+                bankerPlayer = player;
+            }
+        }
+        if (!bankerPlayer) {
+            this._bankerIndex = 0;
+        } else {
+            if (!bankerPlayer.getIsWin()) {
+                //如果庄家没有赢，那么下一位玩家设置为庄家
+                this._bankerIndex++;
+                if (this._bankerIndex === this._playerList.length) {
+                    this._bankerIndex = 0;
+                }
+            }
+        }
+        for (let i = 0; i < this._playerList.length; i++) {
+            let player = this._playerList[i];
+            player.setIsBanker(false);
+        }
+        this._playerList[this._bankerIndex].setIsBanker(true);
+    }
     getId() {
         return this._roomId;
     }
+
     playerEnterGameLayer(player) {
         let isHave = false;
         for (let i = 0; i < this._playerList.length; i++) {
@@ -122,7 +164,7 @@ class Room {
             }
         }
     }
-    getState(){
+    getState() {
         return this._state.getState();
     }
 }

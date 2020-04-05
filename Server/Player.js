@@ -11,6 +11,18 @@ class Player {
         this._isHouseMaster = false;
         this._state = new State();
         this._state.setState('wait');
+        this._isBanker = false;
+        this._cardList = [];
+    }
+    pushCard(cardList){
+        this._cardList = cardList;
+        this.sendMessage("push-card", {cardList: this._cardList}, 0);
+    }
+    setIsBanker(value) {
+        this._isBanker = value;
+    }
+    getIsBanker() {
+        return this._isBanker;
     }
     getId() {
         return this._id;
@@ -21,21 +33,28 @@ class Player {
         let callBackId = data.callBackId;
         this._client = client;
         this._id = id;
-        return this._db.getPlayerInfo(id).then((data) => {
-            this._nickName = data.nickname;
-            this._houseCardCount = data.housecardcount;
-            this._headImageUrl = data.headimageurl;
-            this.sendMessage("login-success", {
-                id: this._id,
-                nickName: this._nickName,
-                houseCardCount: this._houseCardCount,
-                headImageUrl: this._headImageUrl
-            }, callBackId);
-            this.registerEvent(client);
-        }).catch((err) => {
-            console.log("登录失败", err);
-            this.sendMessage('login-fail', { err: err }, callBackId);
+        return new Promise((resolve, reject) => {
+            this._db.getPlayerInfo(id).then((data) => {
+                this._nickName = data.nickname;
+                this._houseCardCount = data.housecardcount;
+                this._headImageUrl = data.headimageurl;
+                this.sendMessage("login-success", {
+                    id: this._id,
+                    nickName: this._nickName,
+                    houseCardCount: this._houseCardCount,
+                    headImageUrl: this._headImageUrl
+                }, callBackId);
+                this.registerEvent(client);
+                resolve();
+            }).catch((err) => {
+                console.log("登录失败", err);
+                this.sendMessage('login-fail', { err: err }, callBackId);
+                reject();
+
+            });
         });
+
+
     }
     reLogin(data, client) {
         let callBackId = data.callBackId;
@@ -118,6 +137,9 @@ class Player {
                     }).catch((err) => {
                         this.sendMessage("enter-fail", { err: err }, callBackId);
                     });
+                    if (this._cardList.length !== 0){
+                        this.sendMessage("push-card", {cardList: this._cardList},0);
+                    }
                 }
                 break;
             case 'start-game':
@@ -138,7 +160,7 @@ class Player {
     getHouseCardCount() {
         return this._houseCardCount;
     }
-    roomStartGame(){
+    roomStartGame() {
         this._state.setState("start-game");
         this.sendMessage("sync-state", this._state.getState(), 0);
     }
@@ -150,7 +172,8 @@ class Player {
             totalScore: this._totalScore,
             currentScore: this._currentScore,
             isHouseMaster: this._isHouseMaster,
-            state: this._state.getState()
+            state: this._state.getState(),
+            isBanker: this._isBanker
         }
     }
     sendSyncAllPlayerInfo(info) {
@@ -162,7 +185,7 @@ class Player {
     getIsHouseMaster() {
         return this._isHouseMaster;
     }
-  
+
     sendMessage(type, data, callBackId) {
         let str = JSON.stringify({
             type: type,
