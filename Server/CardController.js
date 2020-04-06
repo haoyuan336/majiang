@@ -10,7 +10,7 @@ class CardController {
         for (let j = 0; j < types.length; j++) {
             for (let i = 0; i < 9; i++) {
                 for (let h = 0; h < 4; h++) {
-                    let card = new Card(types[j], i + 1);
+                    let card = new Card(types[j], i + 1,cardlist.length);
                     cardlist.push(card);
                 }
             }
@@ -18,7 +18,7 @@ class CardController {
         let types2 = ['dong', 'xi', 'nan', 'bei', 'zhong', 'fa', 'bai'];
         for (let j = 0; j < types2.length; j++) {
             for (let i = 0; i < 4; i++) {
-                let card = new Card(types2[j], j);
+                let card = new Card(types2[j], j, cardlist.length);
                 cardlist.push(card);
             }
         }

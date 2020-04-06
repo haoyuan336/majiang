@@ -2,6 +2,7 @@ class Controller {
     constructor() {
         this._mainNode = undefined;
         this._id = this.getQueryVariable('id')||"000000";
+        this._currentFocusPlayerId = undefined;
     }
     getId(){
         return this._id;
@@ -33,6 +34,12 @@ class Controller {
             }
         }
         return false;
+    }
+    setCurrentFocusPlayerId(id){
+        this._currentFocusPlayerId = id;
+    }
+    getCurrentFocusPlayerId(){
+        return this._currentFocusPlayerId;
     }
 }
 export default Controller;

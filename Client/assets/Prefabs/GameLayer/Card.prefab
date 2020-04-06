@@ -39,8 +39,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
+      "width": 75,
+      "height": 113
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -84,8 +84,11 @@
       "__id__": 1
     },
     "_enabled": true,
-    "spriteFrameAtlas": {
+    "mySpriteFrameAtlas": {
       "__uuid__": "e6ac9c7e-7776-4c61-9a49-9992b0176f60"
+    },
+    "backSpriteFrame": {
+      "__uuid__": "a88e0ef9-d47e-4dd1-a75b-ba6b64ef4993"
     },
     "_id": ""
   },

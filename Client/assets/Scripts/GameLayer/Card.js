@@ -1,10 +1,17 @@
+import global from "../global";
+
 cc.Class({
     extends: cc.Component,
 
     properties: {
-        spriteFrameAtlas: cc.SpriteAtlas
+        mySpriteFrameAtlas: cc.SpriteAtlas,
+        backSpriteFrame: cc.SpriteFrame
     },
     onLoad() {
+        this._ownerId = undefined;
+        this.node.on("set-owner-id", (id)=>{
+            this._ownerId = id;
+        });
         this.node.on("init-data", (data) => {
             console.log("初始化牌的信息", data);
             // M_bamboo_2 //条
@@ -12,6 +19,7 @@ cc.Class({
             //M_dot_5 //饼
             //
             // let value = data.{_color: "xi", _value: 0}
+            this._id = data._id;
             let color = data._color;
             let value = data._value;
             let type = data._type;
@@ -45,11 +53,23 @@ cc.Class({
                 spriteFrameName = "M_" + colroMap[color] + "_" + value;
             }
             console.log("sprite frame name", spriteFrameName);
-            let spriteFrame = this.spriteFrameAtlas.getSpriteFrame(spriteFrameName);
+            let spriteFrame = this.mySpriteFrameAtlas.getSpriteFrame(spriteFrameName);
             this.node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
             this._cardData = data;
         });
+        this.node.on("show-back", ()=>{
+            this.node.getComponent(cc.Sprite).spriteFrame = this.backSpriteFrame;
+        });
+        // this.node.on("click", ()=>{
+        //     if (global.controller.getCurrentFocusPlayerId() === global.controller.getId()){
+        //         if (this._ownerId === global.controller.getId()){
+        //             console.log("click = ", this._cardData);
+        //             // this.node.emit("click")
+        //         }
+        //     }
+        // });
     },
+    
     start() {
 
     },
@@ -57,5 +77,7 @@ cc.Class({
         return this._cardData;
     },
 
-    update(dt) { }
+    getId(){
+        return this._id;
+    }
 });

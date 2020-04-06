@@ -13,10 +13,27 @@ class Player {
         this._state.setState('wait');
         this._isBanker = false;
         this._cardList = [];
+        this._roomCardCount = 0;
+        this._isFocus = false;
+        this._outCardList = [];
+        this._currentFoucsPlayerId = undefined;
+        this._allPlayerOutCardInfo = undefined;
     }
-    pushCard(cardList){
+    setFocus(value) {
+        this._isFocus = value;
+    }
+    getIsFocus() {
+        return this._isFocus;
+    }
+    pushCard(cardList) {
         this._cardList = cardList;
-        this.sendMessage("push-card", {cardList: this._cardList}, 0);
+        this.sendMessage("push-card", {
+            cardList: this._cardList
+        }, 0);
+    }
+    updateCardCount(count) {
+        this._roomCardCount = count;
+        this.sendMessage("update-card-count", { roomCardCount: count }, 0);
     }
     setIsBanker(value) {
         this._isBanker = value;
@@ -137,9 +154,21 @@ class Player {
                     }).catch((err) => {
                         this.sendMessage("enter-fail", { err: err }, callBackId);
                     });
-                    if (this._cardList.length !== 0){
-                        this.sendMessage("push-card", {cardList: this._cardList},0);
+                    if (this._cardList.length !== 0) {
+                        this.sendMessage("push-card", {
+                            cardList: this._cardList,
+                            roomCardCount: this._roomCardCount
+                        }, 0);
                     }
+                    if (this._currentFoucsPlayerId !== undefined) {
+                        this.sendMessage('sync-focus-player-id', this._currentFoucsPlayerId, 0);
+                    }
+                    if (this._allPlayerOutCardInfo !== undefined){
+                        this.sendMessage("sync-all-player-out-card-list", this._allPlayerOutCardInfo, 0);
+                    }
+                    // if (this._outCardList.length !== 0){
+                    //     this.sendMessage("sync-out-cardlist", {})
+                    // }
                 }
                 break;
             case 'start-game':
@@ -153,9 +182,50 @@ class Player {
                     }
                 }
                 break;
+            case 'get-one-card':
+                if (this._room) {
+                    if (this._cardList.length < 14) {
+                        let result = this._room.getOneCardData(this);
+                        if (result.err) {
+                            this.sendMessage("fail", { err: result.err }, callBackId);
+
+                        } else {
+                            this._cardList.push(result);
+                            this.sendMessage("get-one-card-success", result, callBackId);
+                        }
+                    }
+
+                } else {
+                    this.sendMessage("fail", { err: "不在房间里面了" }, callBackId);
+                }
+                break;
+            case 'player-out-one-card':
+                let cardId = data;
+                if (this._room) {
+                    this._room.playerOutOneCard(this, cardId);
+                    this.sendMessage('player-out-one-card', 'success', callBackId);
+                }
+                break;
             default:
                 break;
         }
+    }
+    playerOutOneCardData(cardId) {
+        console.log("需要一处的牌 id是", cardId);
+        let target = undefined;
+        for (let i = 0; i < this._cardList.length; i++) {
+            let card = this._cardList[i];
+            console.log("循环到的牌的id是", card._id);
+            if (card._id === cardId) {
+                this._cardList.splice(i, 1);
+                target = card;
+            }
+        }
+        this._outCardList.push(target);
+        return target;
+    }
+    getLastCardCount() {
+        return this._cardList.length;
     }
     getHouseCardCount() {
         return this._houseCardCount;
@@ -173,11 +243,16 @@ class Player {
             currentScore: this._currentScore,
             isHouseMaster: this._isHouseMaster,
             state: this._state.getState(),
-            isBanker: this._isBanker
+            isBanker: this._isBanker,
+            isFocus: this._isFocus
         }
     }
     sendSyncAllPlayerInfo(info) {
         this.sendMessage("sync-all-player-info", info, 0);
+    }
+    sendSyncFocusPlayerMessage(id) {
+        this._currentFoucsPlayerId = id;
+        this.sendMessage("sync-focus-player-id", id, 0);
     }
     setHouseMaster(value) {
         this._isHouseMaster = value;
@@ -185,7 +260,13 @@ class Player {
     getIsHouseMaster() {
         return this._isHouseMaster;
     }
-
+    sendPlayerOutOneCardMessage(data) {
+        this._allPlayerOutCardInfo = data;
+        this.sendMessage("sync-all-player-out-card-list", data, 0);
+    }
+    getOutCardList() {
+        return this._outCardList;
+    }
     sendMessage(type, data, callBackId) {
         let str = JSON.stringify({
             type: type,

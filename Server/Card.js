@@ -6,7 +6,8 @@ const ColorTypeMap = {
 };
 
 class Card {
-    constructor(color, value) {
+    constructor(color, value, id) {
+        this._id = id;
         this._color = color;
         this._value = value;
         this._type = ColorTypeMap[color]?ColorTypeMap[color]:ColorTypeMap['feng'];

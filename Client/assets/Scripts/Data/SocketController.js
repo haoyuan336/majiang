@@ -29,8 +29,17 @@ class SocketController {
     onSyncState(state) {
         console.warn("on sync state", state);
     }
-    onPushCard(data){
+    onPushCard(data) {
         console.warn("on push card", data);
+    }
+    onUpdateCardCount(data){
+        console.warn("on update card count", data);
+    }
+    onSyncFocusPlayerId(data){
+        console.warn("on sync foucs player", data);
+    }
+    onSyncAllPlayerOutCardList(data){
+        console.warn("on sync all player out card list", data);
     }
     processMessage(spec) {
         console.log("处理消息", spec);
@@ -57,10 +66,20 @@ class SocketController {
             case 'push-card':
                 this.onPushCard(data);
                 break;
+            case 'update-card-count':
+                this.onUpdateCardCount(data);
+                break;
+            case 'sync-focus-player-id':
+                this.onSyncFocusPlayerId(data);
+                break;
+            case 'sync-all-player-out-card-list':
+                this.onSyncAllPlayerOutCardList(data);
+                break;        
             default:
                 break
         }
     }
+    
     login(id) {
         return new Promise((resole, reject) => {
             this.sendMessage(
@@ -94,6 +113,27 @@ class SocketController {
         return new Promise((resole, reject) => {
             this.sendMessage("exit-room", "", resole);
         });
+    }
+    sendOutOneCardMessage(id){
+        return new Promise((resole, reject)=>{
+            this.sendMessage("player-out-one-card", id, (data)=>{
+                resole(data);
+            });
+        });
+    }
+    sendGetOneCard(){
+        //得到一张牌
+        return new Promise((resole, reject)=>{
+            console.log("发送获取一张牌的操作")
+            this.sendMessage('get-one-card', "", (data)=>{
+                console.log("获取一张牌的信息", data);
+                if(data.err){
+                    reject(data.err);
+                }else{
+                    resole(data);
+                }
+            });
+        })
     }
     sendMessage(type, data, callBack) {
         this._connent.send(JSON.stringify({

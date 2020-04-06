@@ -19,6 +19,8 @@ class Room {
         this._state.addState("start-game", this.startGame.bind(this));
         this._cardController = new CardController();
         this._bankerIndex = 0;
+        this._focusPlayerIndex = undefined;
+        this._currentOutCard = undefined;//当前被打出来的牌
     }
     startGame() {
         console.log("开始游戏");
@@ -35,6 +37,51 @@ class Room {
         this.setBanker();
         this._onePackCards = onePackCards;
         this.pushCard();
+        this.updateCardCount();
+        this.setFocusPlayer();
+
+    }
+    setFocusPlayer() {
+        //设置焦点玩家
+        //首先找到上一个焦点玩家
+        // let focusPlayer = undefined;
+        // for (let i = 0 ; i < this._playerList.length ; i ++){
+
+        // }
+        if (this._focusPlayerIndex === undefined) {
+            this._focusPlayerIndex = this._bankerIndex;
+        } else {
+            this._focusPlayerIndex++;
+            if (this._focusPlayerIndex == this._playerList.length) {
+                this._focusPlayerIndex = 0;
+            }
+        }
+        for (let i = 0; i < this._playerList.length; i++) {
+            this._playerList[i].setFocus(false);
+        }
+        this._playerList[this._focusPlayerIndex].setFocus(true);
+        // this.syncAllPlayerInfo();
+
+        for (let i = 0; i < this._playerList.length; i++) {
+            let player = this._playerList[i];
+            player.sendSyncFocusPlayerMessage(this._playerList[this._focusPlayerIndex].getId());
+        }
+    }
+    getOneCardData(player) {
+        if (this._onePackCards.length > 0) {
+            let oneCardData = this._onePackCards.pop();
+            this.updateCardCount();
+            return oneCardData;
+        } else {
+            return { err: "没牌了" };
+        }
+
+    }
+    updateCardCount() {
+        for (let i = 0; i < this._playerList.length; i++) {
+            let player = this._playerList[i];
+            player.updateCardCount(this._onePackCards.length);
+        }
     }
     pushCard() {
         for (let i = 0; i < this._playerList.length; i++) {
@@ -70,11 +117,31 @@ class Room {
             player.setIsBanker(false);
         }
         this._playerList[this._bankerIndex].setIsBanker(true);
+        this.syncAllPlayerInfo();
     }
     getId() {
         return this._roomId;
     }
-
+    playerOutOneCard(player, cardId) {
+        this._currentOutCard = player.playerOutOneCardData(cardId);
+        //广播一下
+        let playerOutCardList = [];
+        for (let i = 0; i < this._playerList.length; i++) {
+            playerOutCardList.push({
+                id: this._playerList[i].getId(),
+                cardList: this._playerList[i].getOutCardList()
+            })
+        }
+        for (let i = 0; i < this._playerList.length; i++) {
+            let player = this._playerList[i];
+            player.sendPlayerOutOneCardMessage({
+                playerOutCardList: playerOutCardList,
+                targetCard: this._currentOutCard
+            });
+        }
+        //将焦点设置到下一位玩家
+        this.setFocusPlayer();
+    }
     playerEnterGameLayer(player) {
         let isHave = false;
         for (let i = 0; i < this._playerList.length; i++) {

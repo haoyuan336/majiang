@@ -11,7 +11,8 @@ cc.Class({
         playerNodePrefab: cc.Prefab,
         startGameButton: cc.Node,
         backButton: cc.Node,
-        myCardLayerPrefab: cc.Prefab
+        myCardLayerPrefab: cc.Prefab,
+        cardCountLabel: cc.Node
     },
     onLoad() {
         //进入房间成功
@@ -19,18 +20,102 @@ cc.Class({
         global.socketController.onSyncAllPlayerInfo = this.syncAllPlayerInfo.bind(this);
         global.socketController.onSyncState = this.syncState.bind(this);
         global.socketController.onPushCard = this.showCards.bind(this);
+        global.socketController.onUpdateCardCount = this.updateCardCount.bind(this);
+        global.socketController.onSyncFocusPlayerId = this.syncFocusePlayerId.bind(this);
+        global.socketController.onSyncAllPlayerOutCardList = this.syncAllPlayerOutCardList.bind(this);
         this.myCardLayer = cc.instantiate(this.myCardLayerPrefab);
         this.myCardLayer.parent = this.node;
         this.myCardLayer.scale = 0.7;
-        this.myCardLayer.y = -160;
+        this.myCardLayer.y = -200;
+        this.myCardLayer.on("player-click-card-node", (id, cb) => {
+            // console.log("玩家点击了某张牌 id是", id);
+            // console.log("current focus player id", global.controller.getCurrentFocusPlayerId());
+            // console.log("self id", global.controller.getId());
+            // console
+
+            if (global.controller.getCurrentFocusPlayerId() == global.controller.getId()
+                && this._cardList.length === 14) {
+
+                global.socketController.sendOutOneCardMessage(id).then((result) => {
+                    console.log("玩家打了一张牌", result);
+                    if (!result.err && cb) {
+                        cb();
+                    }
+                });
+            }
+        });
+        // this.myCardLayer.addComponent(cc.Button);
+        // this.myCardLayer.on("click", ()=>{
+        //     console.log(" game layer click");
+        // })
     },
-    showCards(data){
+    showCards(data) {
         console.log("显示牌", data);
         let cardList = data.cardList;
-        for (let i = 0 ; i < cardList.length ; i ++){
+        this._cardList = cardList;
+        for (let i = 0; i < cardList.length; i++) {
             this.myCardLayer.emit("push-card", cardList[i]);
         }
+        for (let i = 0; i < this._playerNodeList.length; i++) {
+            let playerNode = this._playerNodeList[i];
+            playerNode.emit("show-card-back");
+        }
+        if (data.roomCardCount !== undefined) {
+            // this.cardCountLabel.getComponent(cc.Label).string = "剩余牌数:" + data.roomCardCount;
+            this.updateCardCount(data);
+        }
+
         // this.myCardLayer.emit("")
+    },
+    syncFocusePlayerId(id) {
+        // this._currentFocusPlayerId = id;
+        global.controller.setCurrentFocusPlayerId(id);
+
+        if (id === global.controller.getId()) {
+            this.processNextEvent();
+        }
+    },
+    syncAllPlayerOutCardList(data) {
+        //同步所有玩家已经打出去的牌
+        let cardList = data.playerOutCardList;
+        let currentCard = data.targetCard;
+        console.log("card list", cardList);
+        console.log("current card", currentCard);
+
+        let myData = undefined;
+        for (let i = 0; i < cardList.length; i++) {
+            if (global.controller.getId() == cardList[i].id) {
+                myData = cardList[i];
+            }
+        }
+        console.log("my data", myData);
+        this.myCardLayer.emit("update-out-card-info", myData, currentCard);
+    },
+    processNextEvent() {
+        if (this._cardList.length < 14) {
+            global.socketController.sendGetOneCard().then((data) => {
+                console.log("获取一张牌", data);
+                this._cardList.push(data);
+                this.myCardLayer.emit('push-card', data);
+            });
+        }
+    },
+    updateCardCount(data) {
+        if (data.roomCardCount !== undefined) {
+            this.node.runAction(
+                cc.sequence(
+                    cc.delayTime(2),
+                    cc.callFunc(() => {
+                        this.cardCountLabel.getComponent(cc.Label).string = "剩余牌数:" + data.roomCardCount;
+                    })
+                )
+            )
+        }
+        // if (this._isFocus && this._cardList.length === 13){
+        //     global.socketController.sendGetOneCard().then((data)=>{
+        //         console.log("获取到一张牌", data);
+        //     });
+        // }
     },
     syncState(state) {
         console.log("同步房间状态", state);
@@ -62,7 +147,6 @@ cc.Class({
                 let node = this._playerNodeList.pop();
                 node.destroy();
             }
-
         }
         let listIndex = 0;
         for (let i = 0; i < playersInfo.length; i++) {
@@ -75,13 +159,16 @@ cc.Class({
             playerNode.emit("update-info", playersInfo[i], i, listIndex);
         }
         let state = '';
+        let isFocus = false;
         for (let i = 0; i < playersInfo.length; i++) {
             let player = playersInfo[i];
             if (player.id === global.controller.getId()) {
                 this._isHouseMaster = player.isHouseMaster;
                 state = player.state;
+                isFocus = player.isFocus;
             }
         }
+        this._isFocus = isFocus;
         console.log("state", state);
         console.log('is house master', this._isHouseMaster);
         this.syncState(state);

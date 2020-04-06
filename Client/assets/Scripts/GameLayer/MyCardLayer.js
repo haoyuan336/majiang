@@ -1,3 +1,5 @@
+import global from "../global";
+
 cc.Class({
     extends: cc.Component,
 
@@ -7,16 +9,37 @@ cc.Class({
     onLoad() {
         this._cardDataQuene = [];
         this._cardNodeList = [];
+        // this._outCardNodeList = [];
+        this._currentOutCardList = [];
         this.node.on("push-card", (data) => {
             console.log("push card", data);
             this._cardDataQuene.push(data);
         });
-
+        this.node.on("update-out-card-info", (data, currentCard) => {
+            let cardList = data.cardList;
+            let count = cardList.length - this._currentOutCardList.length;
+            console.log("count", count);
+            if (count > 0) {
+                for (let i = 0; i < count; i++) {
+                    let node = cc.instantiate(this.cardPrefab);
+                    node.parent = this.node;
+                    node.x = -430 + 70 * this._currentOutCardList.length;
+                    node.y = 120 + Math.floor((this._currentOutCardList.length / 10)) * 100;
+                    this._currentOutCardList.push(node);
+                }
+                for (let i = 0; i < this._currentOutCardList.length; i++) {
+                    let node = this._currentOutCardList[i];
+                    console.log("i", i);
+                    node.emit('init-data', cardList[i]);
+                }
+            }
+        });
     },
     start() {
         this._addOneCardTime = 0;
     },
     referCardNodePos() {
+        console.log("刷新牌的位置");
         this._cardNodeList = this._cardNodeList.sort((a, b) => {
             let cardA = a.getComponent('Card').getCardData();
             let cardB = b.getComponent('Card').getCardData();
@@ -63,18 +86,47 @@ cc.Class({
         }
         for (let i = 0; i < convertList.length; i++) {
             let node = convertList[i];
-            node.runAction(cc.moveTo(0.1, (i + 1) * 70 - 500, 0));
+            if (i === 13) {
+                node.runAction(cc.moveTo(0.1, (i + 1) * 70 - 500 + 30, 0));
+
+            } else {
+                node.runAction(cc.moveTo(0.1, (i + 1) * 70 - 500, 0));
+            }
         }
+        this._cardNodeList = convertList;
         // console.log("card node list", this._cardNodeList);
+    },
+    addOneCardNode(data, index) {
+        let card = cc.instantiate(this.cardPrefab);
+        card.parent = this.node;
+        card.emit('init-data', data);
+        card.emit("set-owner-id", global.controller.getId());
+        card.addComponent(cc.Button);
+        console.log("添加点击事件");
+        card.on("click", () => {
+            let id = card.getComponent('Card').getId();
+            this.node.emit("player-click-card-node", id, () => {
+                for (let i = 0; i < this._cardNodeList.length; i++) {
+                    let target = this._cardNodeList[i].getComponent("Card");
+                    if (target.getId() === id) {
+                        this._cardNodeList.splice(i, 1);
+                        break;
+                    }
+                }
+                this.referCardNodePos();
+                card.destroy();
+
+            });
+            // console.log("click w", index);
+        });
+        return card;
     },
     update(dt) {
         if (this._addOneCardTime > 0.1) {
             this._addOneCardTime = 0;
             if (this._cardDataQuene.length > 0) {
                 let data = this._cardDataQuene.shift();
-                let card = cc.instantiate(this.cardPrefab);
-                card.parent = this.node;
-                card.emit('init-data', data);
+                let card = this.addOneCardNode(data, this._cardNodeList.length);
                 this._cardNodeList.push(card);
                 card.x = this._cardNodeList.length * 70 - 500;
                 if (this._cardDataQuene.length === 0) {
