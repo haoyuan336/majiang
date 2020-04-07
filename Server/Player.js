@@ -222,6 +222,7 @@ class Player {
             }
         }
         this._outCardList.push(target);
+        this.sendMessage("sync-self-card-list", this._cardList, 0);
         return target;
     }
     getLastCardCount() {

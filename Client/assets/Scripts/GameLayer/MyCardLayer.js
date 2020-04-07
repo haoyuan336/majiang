@@ -59,22 +59,22 @@ cc.Class({
                 for (let i = 0; i < this._cardNodeList.length; i++) {
                     let targetNode = this._cardNodeList[i];
                     let targetCard = targetNode.getComponent("Card").getCardData();
-                    console.log("color = ", lastCard._color);
-                    console.log("target card ", targetCard._color);
+                    // console.log("color = ", lastCard._color);
+                    // console.log("target card ", targetCard._color);
                     if (targetCard._type === lastCard._type) {
-                        console.log("找到了一张一样的牌型", lastCard._color);
+                        // console.log("找到了一张一样的牌型", lastCard._color);
                         this._cardNodeList.splice(i, 1);
                         i--;
                         list.push(targetNode);
                     }
                 }
-                console.log("list", list.length);
+                // console.log("list", list.length);
                 list.push(convertList.pop());
                 list = list.sort((a, b) => {
                     let cardA = a.getComponent('Card').getCardData();
                     let cardB = b.getComponent('Card').getCardData();
                     let value = cardA._value - cardB._value;
-                    console.log("value", value);
+                    // console.log("value", value);
                     return value;
                 });
                 convertList = convertList.concat(list);

@@ -24,6 +24,7 @@ cc.Class({
         global.socketController.onUpdateCardCount = this.updateCardCount.bind(this);
         global.socketController.onSyncFocusPlayerId = this.syncFocusePlayerId.bind(this);
         global.socketController.onSyncAllPlayerOutCardList = this.syncAllPlayerOutCardList.bind(this);
+        global.socketController.onSyncSelfCardList = this.syncSelfCardList.bind(this);
         this.myCardLayer = cc.instantiate(this.myCardLayerPrefab);
         this.myCardLayer.parent = this.node;
         this.myCardLayer.scale = 0.7;
@@ -68,6 +69,10 @@ cc.Class({
 
         // this.myCardLayer.emit("")
     },
+    syncSelfCardList(data) {
+        this._cardList = data;
+
+    },
     syncFocusePlayerId(id) {
         // this._currentFocusPlayerId = id;
         global.controller.setCurrentFocusPlayerId(id);
@@ -79,6 +84,7 @@ cc.Class({
         //同步所有玩家已经打出去的牌
         let cardList = data.playerOutCardList;
         let currentCard = data.targetCard;
+        this._currentOutCard = currentCard;
         let outPlayerId = data.outPlayerId;
         this._currentOutPlayerId = outPlayerId; //当前出牌的玩家
         console.log("card list", cardList);
@@ -94,7 +100,9 @@ cc.Class({
         this.myCardLayer.emit("update-out-card-info", myData, currentCard);
     },
     getOneCard() {
+        console.log("获取一张牌");
         return new Promise((resole, reject) => {
+
             if (this._cardList.length < 14) {
                 global.socketController.sendGetOneCard().then((data) => {
                     console.log("获取一张牌", data);
@@ -111,21 +119,82 @@ cc.Class({
             this.getOneCard();
         } else {
             let result = this.checkCardResult();
-            if (!result) {
-                this.getOneCard();
+            // if (!result) {
+            //     this.getOneCard();
+            // }
+            if (){
+                
             }
         }
 
     },
     checkCardResult() {
         //检查牌的结果
-        return false;
+        console.log("检查可以吃碰", this._ruleType);
+        let eatResult = undefined;
+        let pengResult = undefined;
+        switch (this._ruleType) {
+            case 'rule-type-1':
+                //胡吃乱碰
+                eatResult = this.checkCanEat();
+                pengResult = this.checkCanPeng();
+                break;
+            case 'rule-type-2':
+                //只碰不吃
+                pengResult = this.checkCanPeng();
+                break;
+            default:
+                break;
+        }
+        return {
+            eatResult: eatResult,
+            pengResult: pengResult
+        }
+    },
+    checkCanEat() {
+        //检查是否可以吃
+        //根据自己的牌型，与上家打出的牌。检查一下是否可以吃
+        let type = this._currentOutCard._type;
+        let list = [];
+        for (let j = 0; j < this._cardList.length; j++) {
+            let card = this._cardList[j];
+            if (card._type === type &&
+                card._value !== this._currentOutCard._value) {
+                list.push(card);
+            }
+        }
+        list.push(this._currentOutCard);
+        list.sort((a, b) => {
+            return a._value - b._value;
+        });
+        console.log("list= ", list);
+        let index = 0;
+        for (let j = 0; j < list.length; j++) {
+            if (this._currentOutCard._id === list[j]._id) {
+                index = j;
+            }
+        }
+        for (let j = 0; j < 3; j++) {
+            let x = index - 2 + j;
+            if (x > 0) {
+                if (list[x] + list[x + 2] == 2 * list[x + 1]) {
+                    console.log("找到了可以吃的牌型");
+                }
+
+            }
+        }
+        // for (let i = 0 ; i < this._cardList.length ; i ++){
+
+        // }
+    },
+    checkCanPeng() {
+        //检查是否可以碰
     },
     updateCardCount(data) {
         if (data.roomCardCount !== undefined) {
             this.node.runAction(
                 cc.sequence(
-                    cc.delayTime(2),
+                    cc.delayTime(0.1),
                     cc.callFunc(() => {
                         this.cardCountLabel.getComponent(cc.Label).string = "剩余牌数:" + data.roomCardCount;
                     })
@@ -206,6 +275,7 @@ cc.Class({
             this.rountCountLabel.getComponent(cc.Label).string = "总局数:" + data.totalRoundCount + " 当前局数:" + data.currentRountCount;
             // let playersInfo = data.playersInfo;
             // this.updateAllPlayerNode(playersInfo);
+            this._ruleType = data.ruleType;
         });
     },
     onButtonClick(event, customData) {

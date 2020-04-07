@@ -169,7 +169,8 @@ class Room {
                 ruleTypeName: this._ruleTypeName,
                 rateConfig: this._rateConfig,
                 totalRoundCount: this._totalRoundCount,
-                currentRountCount: this._currentRoundCount
+                currentRountCount: this._currentRoundCount,
+                ruleType: this._ruleType
             });
             this.syncAllPlayerInfo();
         });

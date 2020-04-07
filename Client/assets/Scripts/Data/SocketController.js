@@ -41,6 +41,9 @@ class SocketController {
     onSyncAllPlayerOutCardList(data){
         console.warn("on sync all player out card list", data);
     }
+    onSyncSelfCardList(data){
+        console.warn("on sync self card list", data);
+    }
     processMessage(spec) {
         console.log("处理消息", spec);
         let type = spec.type;
@@ -74,6 +77,9 @@ class SocketController {
                 break;
             case 'sync-all-player-out-card-list':
                 this.onSyncAllPlayerOutCardList(data);
+                break;    
+            case 'sync-self-card-list':
+                this.onSyncSelfCardList(data);
                 break;        
             default:
                 break
