@@ -21,6 +21,7 @@ class Room {
         this._bankerIndex = 0;
         this._focusPlayerIndex = undefined;
         this._currentOutCard = undefined;//当前被打出来的牌
+        this._currentAskPlayerIndex = undefined; //被询问的当前的玩家的index
     }
     startGame() {
         console.log("开始游戏");
@@ -133,14 +134,21 @@ class Room {
             })
         }
         for (let i = 0; i < this._playerList.length; i++) {
-            let player = this._playerList[i];
-            player.sendPlayerOutOneCardMessage({
+            let target = this._playerList[i];
+            target.sendPlayerOutOneCardMessage({
                 playerOutCardList: playerOutCardList,
-                targetCard: this._currentOutCard
+                targetCard: this._currentOutCard,
+                outPlayerId: player.getId()
             });
         }
         //将焦点设置到下一位玩家
         this.setFocusPlayer();
+        // this._currentAskPlayerIndex = this._focusPlayerIndex + 1;
+        //询问剩下 的所有的玩家 是否吃或者碰
+
+    }
+    askPlayerOrEat(){
+        //询问玩家可以吃跟碰么。
     }
     playerEnterGameLayer(player) {
         let isHave = false;

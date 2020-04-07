@@ -17,6 +17,7 @@ cc.Class({
     onLoad() {
         //进入房间成功
         this._playerNodeList = [];
+        this._currentOutPlayerId = undefined;
         global.socketController.onSyncAllPlayerInfo = this.syncAllPlayerInfo.bind(this);
         global.socketController.onSyncState = this.syncState.bind(this);
         global.socketController.onPushCard = this.showCards.bind(this);
@@ -70,7 +71,6 @@ cc.Class({
     syncFocusePlayerId(id) {
         // this._currentFocusPlayerId = id;
         global.controller.setCurrentFocusPlayerId(id);
-
         if (id === global.controller.getId()) {
             this.processNextEvent();
         }
@@ -79,6 +79,8 @@ cc.Class({
         //同步所有玩家已经打出去的牌
         let cardList = data.playerOutCardList;
         let currentCard = data.targetCard;
+        let outPlayerId = data.outPlayerId;
+        this._currentOutPlayerId = outPlayerId; //当前出牌的玩家
         console.log("card list", cardList);
         console.log("current card", currentCard);
 
@@ -91,14 +93,33 @@ cc.Class({
         console.log("my data", myData);
         this.myCardLayer.emit("update-out-card-info", myData, currentCard);
     },
+    getOneCard() {
+        return new Promise((resole, reject) => {
+            if (this._cardList.length < 14) {
+                global.socketController.sendGetOneCard().then((data) => {
+                    console.log("获取一张牌", data);
+                    this._cardList.push(data);
+                    this.myCardLayer.emit('push-card', data);
+                    resole();
+                });
+            }
+        });
+    },
     processNextEvent() {
-        if (this._cardList.length < 14) {
-            global.socketController.sendGetOneCard().then((data) => {
-                console.log("获取一张牌", data);
-                this._cardList.push(data);
-                this.myCardLayer.emit('push-card', data);
-            });
+        if (this._currentOutPlayerId === undefined) {
+            //还没有玩家出牌,那么当前的焦点玩家发送获取一张牌的操作
+            this.getOneCard();
+        } else {
+            let result = this.checkCardResult();
+            if (!result) {
+                this.getOneCard();
+            }
         }
+
+    },
+    checkCardResult() {
+        //检查牌的结果
+        return false;
     },
     updateCardCount(data) {
         if (data.roomCardCount !== undefined) {
