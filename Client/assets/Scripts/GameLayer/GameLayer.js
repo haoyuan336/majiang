@@ -119,14 +119,23 @@ cc.Class({
             this.getOneCard();
         } else {
             let result = this.checkCardResult();
-            // if (!result) {
-            //     this.getOneCard();
-            // }
-            if (){
-                
+
+            let isGetCard = true;
+            if (result.eatResult) {
+                isGetCard = false;
+                this.showCanEatCards(result.eatResult);
+            }
+            if (result.pengResult) {
+                isGetCard = false;
+            }
+            if (isGetCard) {
+                this.getOneCard();
             }
         }
 
+    },
+    showCanEatCards(eatResult) {
+        console.log("展示可以吃的牌", eatResult);
     },
     checkCardResult() {
         //检查牌的结果
@@ -163,6 +172,9 @@ cc.Class({
                 list.push(card);
             }
         }
+        //先去重
+        
+        
         list.push(this._currentOutCard);
         list.sort((a, b) => {
             return a._value - b._value;
@@ -174,18 +186,25 @@ cc.Class({
                 index = j;
             }
         }
+        console.log("index", index);
+        let findList = [];
         for (let j = 0; j < 3; j++) {
             let x = index - 2 + j;
-            if (x > 0) {
-                if (list[x] + list[x + 2] == 2 * list[x + 1]) {
+            console.log("x", x);
+            if (x >= 0 && x + 2 < list.length && x + 1 < list.length) {
+                console.log(list[x], list[x + 1], list[x + 2]);
+                if (list[x]._value + list[x + 2]._value == 2 * list[x + 1]._value) {
                     console.log("找到了可以吃的牌型");
+                    findList.push(list[x]);
+                    findList.push(list[x + 1]);
+                    findList.push(list[x + 2]);
                 }
-
             }
         }
         // for (let i = 0 ; i < this._cardList.length ; i ++){
 
         // }
+        return findList.length === 0 ? false : findList;
     },
     checkCanPeng() {
         //检查是否可以碰
