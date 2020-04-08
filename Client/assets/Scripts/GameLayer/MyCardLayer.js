@@ -4,11 +4,17 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        cardPrefab: cc.Prefab
+        cardPrefab: cc.Prefab,
+        eatButton: cc.Node,
+        pengButton: cc.Node,
+        gangButton: cc.Node,
+        huButton: cc.Node
     },
     onLoad() {
         this._cardDataQuene = [];
         this._cardNodeList = [];
+        this._activeButton = [this.eatButton, this.pengButton, this.gangButton, this.huButton];
+        this.hideActiveButton();
         // this._outCardNodeList = [];
         this._currentOutCardList = [];
         this.node.on("push-card", (data) => {
@@ -34,9 +40,34 @@ cc.Class({
                 }
             }
         });
+        this.node.on("show-can-interactive-card", (cardList) => {
+            //显示可以交互的牌
+            this.eatButton.active = true;
+            let showCardListIndex = 0;
+            let cardData = cardList[showCardListIndex];
+            console.log("card data", cardData);
+            for (let i = 0; i < this._cardNodeList.length; i++) {
+                let node = this._cardNodeList[i];
+                console.log("node", node);
+                for (let j = 0; j < cardData.length; j++) {
+                    let id = node.getComponent('Card').getId();
+                    console.log("id = ", id);
+                    console.log("card data id", cardData[j]._id);
+                    if (id === cardData[j]._id) {
+                        node.y = 20;
+                    }
+                }
+
+            }
+        });
     },
     start() {
         this._addOneCardTime = 0;
+    },
+    hideActiveButton(){
+        for (let i =  0 ; i < this._activeButton.length ; i ++){    
+            this._activeButton[i].active = false;
+        }
     },
     referCardNodePos() {
         console.log("刷新牌的位置");
@@ -135,6 +166,17 @@ cc.Class({
             }
         } else {
             this._addOneCardTime += dt;
+        }
+    },
+    onButtonClick(event, customData) {
+        console.log("button click", customData);
+        switch (customData) {
+            case 'eat':
+                break;
+            case 'peng':
+                break;
+            default:
+                break;
         }
     }
 });

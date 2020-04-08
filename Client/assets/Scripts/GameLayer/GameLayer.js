@@ -136,6 +136,7 @@ cc.Class({
     },
     showCanEatCards(eatResult) {
         console.log("展示可以吃的牌", eatResult);
+        this.myCardLayer.emit("show-can-interactive-card", eatResult);
     },
     checkCardResult() {
         //检查牌的结果
@@ -168,13 +169,25 @@ cc.Class({
         for (let j = 0; j < this._cardList.length; j++) {
             let card = this._cardList[j];
             if (card._type === type &&
-                card._value !== this._currentOutCard._value) {
+                card._value !== this._currentOutCard._value &&
+                card._type !== 'feng') {
                 list.push(card);
             }
         }
+        console.log("去重之前list", list);
         //先去重
-        
-        
+        let valueMap = {};
+        for (let i = 0; i < list.length; i++) {
+            valueMap[list[i]._value] = list[i];
+        }
+        console.log("value Map ", valueMap);
+        list = [];
+        for (let i in valueMap) {
+            list.push(valueMap[i]);
+        }
+        console.log("list", list);
+
+
         list.push(this._currentOutCard);
         list.sort((a, b) => {
             return a._value - b._value;
@@ -193,11 +206,16 @@ cc.Class({
             console.log("x", x);
             if (x >= 0 && x + 2 < list.length && x + 1 < list.length) {
                 console.log(list[x], list[x + 1], list[x + 2]);
-                if (list[x]._value + list[x + 2]._value == 2 * list[x + 1]._value) {
+                let findData = [];
+                if (Math.abs(list[x]._value - list[x + 1]._value) === 1 &&
+                    Math.abs(list[x + 1]._value - list[x + 2]._value) === 1) {
                     console.log("找到了可以吃的牌型");
-                    findList.push(list[x]);
-                    findList.push(list[x + 1]);
-                    findList.push(list[x + 2]);
+                    findData.push(list[x]);
+                    findData.push(list[x + 1]);
+                    findData.push(list[x + 2]);
+                }
+                if (findData.length !== 0){
+                    findList.push(findData);
                 }
             }
         }
