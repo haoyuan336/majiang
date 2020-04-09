@@ -12,11 +12,24 @@ cc.Class({
         startGameButton: cc.Node,
         backButton: cc.Node,
         myCardLayerPrefab: cc.Prefab,
-        cardCountLabel: cc.Node
+        cardCountLabel: cc.Node,
+        eatButton: cc.Node,
+        pengButton: cc.Node,
+        gangButton: cc.Node,
+        huButton: cc.Node,
+        getCardButton: cc.Node
     },
     onLoad() {
         //进入房间成功
         this._playerNodeList = [];
+        this._activeButton = [
+            this.eatButton, 
+            this.pengButton, 
+            this.gangButton,
+            this.huButton, 
+            this.getCardButton
+        ];
+        this.hideActiveButton();
         this._currentOutPlayerId = undefined;
         global.socketController.onSyncAllPlayerInfo = this.syncAllPlayerInfo.bind(this);
         global.socketController.onSyncState = this.syncState.bind(this);
@@ -50,6 +63,11 @@ cc.Class({
         // this.myCardLayer.on("click", ()=>{
         //     console.log(" game layer click");
         // })
+    },
+    hideActiveButton(){
+        for (let i =  0 ; i < this._activeButton.length ; i ++){    
+            this._activeButton[i].active = false;
+        }
     },
     showCards(data) {
         console.log("显示牌", data);
@@ -140,6 +158,8 @@ cc.Class({
     },
     showCanEatCards(eatResult) {
         console.log("展示可以吃的牌", eatResult);
+        this.eatButton.active = true;
+        this.getCardButton.active = true;
         this.myCardLayer.emit("show-can-interactive-card", eatResult);
     },
     checkCardResult() {
@@ -339,6 +359,16 @@ cc.Class({
                     }
                 });
                 break;
+            case 'get-card':
+                //楼牌
+                 this.hideActiveButton();
+                 this.getOneCard();
+                break;   
+            case 'eat':
+                //吃
+                this.hideActiveButton();
+                global.socketController.sendEatCard
+                break;     
             default:
                 break;
         }

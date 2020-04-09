@@ -5,16 +5,11 @@ cc.Class({
 
     properties: {
         cardPrefab: cc.Prefab,
-        eatButton: cc.Node,
-        pengButton: cc.Node,
-        gangButton: cc.Node,
-        huButton: cc.Node
+       
     },
     onLoad() {
         this._cardDataQuene = [];
         this._cardNodeList = [];
-        this._activeButton = [this.eatButton, this.pengButton, this.gangButton, this.huButton];
-        this.hideActiveButton();
         // this._outCardNodeList = [];
         this._currentOutCardList = [];
         this.node.on("push-card", (data) => {
@@ -42,7 +37,7 @@ cc.Class({
         });
         this.node.on("show-can-interactive-card", (cardList) => {
             //显示可以交互的牌
-            this.eatButton.active = true;
+            // this.eatButton.active = true;
             let showCardListIndex = 0;
             let cardData = cardList[showCardListIndex];
             console.log("card data", cardData);
@@ -64,11 +59,7 @@ cc.Class({
     start() {
         this._addOneCardTime = 0;
     },
-    hideActiveButton(){
-        for (let i =  0 ; i < this._activeButton.length ; i ++){    
-            this._activeButton[i].active = false;
-        }
-    },
+  
     referCardNodePos() {
         console.log("刷新牌的位置");
         this._cardNodeList = this._cardNodeList.sort((a, b) => {
