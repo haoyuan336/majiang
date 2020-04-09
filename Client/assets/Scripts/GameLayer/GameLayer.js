@@ -89,7 +89,11 @@ cc.Class({
         this._currentOutPlayerId = outPlayerId; //当前出牌的玩家
         console.log("card list", cardList);
         console.log("current card", currentCard);
+        //同步其他玩家打的牌
 
+        for (let i = 0 ; i < this._playerNodeList.length ; i ++){
+            this._playerNodeList[i].emit("refer-out-card-data", cardList);
+        }
         let myData = undefined;
         for (let i = 0; i < cardList.length; i++) {
             if (global.controller.getId() == cardList[i].id) {

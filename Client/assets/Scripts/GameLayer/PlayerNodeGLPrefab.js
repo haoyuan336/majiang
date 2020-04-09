@@ -15,6 +15,7 @@ cc.Class({
         this._state = 'wait';
         this._playerSeatConfig = this.GameConfig.json['player-seat-config'];
         this._convertIndex = 0;
+        this._outCardList = [];
         this.node.on("update-info", (data, index, listIndex) => {
             console.log("update player node info", data);
             this._id = data.id;
@@ -43,6 +44,49 @@ cc.Class({
                 this._state = "add-card-back";
             }
         });
+        this.node.on("refer-out-card-data", (cardList) => {
+            //同步打出去的牌的列表
+            console.log("同步每个玩家打出去的牌的列表", cardList);
+            for (let i = 0; i < cardList.length; i++) {
+                let cardData = cardList[i];
+                if (cardData.id === this._id && this._id !== global.controller.getId()) {
+                    let cardList = cardData.cardList;
+                    this.referOutCardListNode(cardList);
+                }
+            }
+        });
+    },
+    referOutCardListNode(cardList) {
+        let count = cardList.length - this._outCardList.length;
+        for (let i = 0; i < count; i++) {
+            let node = cc.instantiate(this.cardPrefab);
+            node.parent = this.node;
+            this._outCardList.push(node);
+        }
+        for (let i = 0; i < this._outCardList.length; i++) {
+            let cardNode = this._outCardList[i];
+            cardNode.emit("init-data", cardList[i]);
+            cardNode.angle = -90 * this._convertIndex + 180;
+            cardNode.scale = 0.4;
+            let pos = this.GameConfig.json['player-node-out-card-pos'][this._convertIndex];
+            switch (this._convertIndex) {
+                case 1:
+                    cardNode.x = pos.x;
+                    cardNode.y = pos.y + (i + 1) * 30;
+                    break;
+                case 2:
+                    cardNode.y = pos.y;
+                    cardNode.x = pos.x - (i + 1) * 30;
+                    break;
+                case 3:
+                    cardNode.x = pos.x;
+                    cardNode.y = pos.y - (i + 1) * 30;
+                    break;
+                default:
+                    break;
+            }
+        }
+
     },
     updateHeadImage(headImageUrl) {
         cc.loader.load(headImageUrl, (err, result) => {
