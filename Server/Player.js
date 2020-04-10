@@ -16,6 +16,7 @@ class Player {
         this._roomCardCount = 0;
         this._isFocus = false;
         this._outCardList = [];
+        this._eatedCardList = [];
         this._currentFoucsPlayerId = undefined;
         this._allPlayerOutCardInfo = undefined;
     }
@@ -163,7 +164,7 @@ class Player {
                     if (this._currentFoucsPlayerId !== undefined) {
                         this.sendMessage('sync-focus-player-id', this._currentFoucsPlayerId, 0);
                     }
-                    if (this._allPlayerOutCardInfo !== undefined){
+                    if (this._allPlayerOutCardInfo !== undefined) {
                         this.sendMessage("sync-all-player-out-card-list", this._allPlayerOutCardInfo, 0);
                     }
                     // if (this._outCardList.length !== 0){
@@ -206,9 +207,33 @@ class Player {
                     this.sendMessage('player-out-one-card', 'success', callBackId);
                 }
                 break;
+            case 'eat-card':
+                console.log("玩家发来了吃牌的消息");
+                if (this._room){
+                    //根据发来的数据，将牌从自己的列表里面清除
+                    for (let i = 0 ; i < this._cardList.length ; i++){
+                        for (let j = 0 ; j < data.length ; j ++){
+                            if (this._cardList[i]._id === data[j]._id){
+                                this._cardList.splice(i, 1);
+                                i --;
+                            }
+                        }
+                    }
+                    this._eatedCardList = data;
+                    this._room.playerEatCard(this, data);
+                }else{
+                    console.error("房间不存在了")
+                }
+                break;
             default:
                 break;
         }
+    }
+    getEatedCardData(){
+        // for (let i = 0 ; i < this._cardList.length ; i ++){
+            
+        // }
+        return this._eatedCardList;
     }
     playerOutOneCardData(cardId) {
         console.log("需要一处的牌 id是", cardId);

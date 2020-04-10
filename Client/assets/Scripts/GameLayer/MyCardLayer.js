@@ -35,11 +35,11 @@ cc.Class({
                 }
             }
         });
-        this.node.on("show-can-interactive-card", (cardList) => {
+        this.node.on("show-can-interactive-card", (cardData) => {
             //显示可以交互的牌
             // this.eatButton.active = true;
-            let showCardListIndex = 0;
-            let cardData = cardList[showCardListIndex];
+            // let showCardListIndex = 0;
+            // let cardData = cardList[showCardListIndex];
             console.log("card data", cardData);
             for (let i = 0; i < this._cardNodeList.length; i++) {
                 let node = this._cardNodeList[i];

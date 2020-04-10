@@ -21,6 +21,7 @@ cc.Class({
     },
     onLoad() {
         //进入房间成功
+        this._canActiveCardsListIndex = 0;
         this._playerNodeList = [];
         this._activeButton = [
             this.eatButton, 
@@ -145,6 +146,7 @@ cc.Class({
             let isGetCard = true;
             if (result.eatResult) {
                 isGetCard = false;
+                this._canEatResult = result.eatResult;
                 this.showCanEatCards(result.eatResult);
             }
             if (result.pengResult) {
@@ -160,7 +162,7 @@ cc.Class({
         console.log("展示可以吃的牌", eatResult);
         this.eatButton.active = true;
         this.getCardButton.active = true;
-        this.myCardLayer.emit("show-can-interactive-card", eatResult);
+        this.myCardLayer.emit("card-up-with-list", eatResult[this._canActiveCardsListIndex]);
     },
     checkCardResult() {
         //检查牌的结果
@@ -367,7 +369,10 @@ cc.Class({
             case 'eat':
                 //吃
                 this.hideActiveButton();
-                global.socketController.sendEatCard
+                let cardList = this._canEatResult[this._canActiveCardsListIndex];
+                global.socketController.sendEatCardNessage(cardList).then(()=>{
+
+                })
                 break;     
             default:
                 break;
