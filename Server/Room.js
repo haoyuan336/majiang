@@ -20,8 +20,8 @@ class Room {
         this._cardController = new CardController();
         this._bankerIndex = 0;
         this._focusPlayerIndex = undefined;
-        this._currentOutCard = undefined;//当前被打出来的牌
-        this._currentOutCardPlayer = undefined; //当前打出去牌的玩家
+        this._currentOutCard = {};//当前被打出来的牌
+        this._currentOutCardPlayerId = 0; //当前打出去牌的玩家
     }
     startGame() {
         console.log("开始游戏");
@@ -124,31 +124,34 @@ class Room {
         return this._roomId;
     }
     playerOutOneCard(player, cardId) {
-        this._currentOutCardPlayer = player;
+        this._currentOutCardPlayerId = player.getId();
         this._currentOutCard = player.playerOutOneCardData(cardId);
         //广播一下
-        let playerOutCardList = [];
-        for (let i = 0; i < this._playerList.length; i++) {
-            playerOutCardList.push({
-                id: this._playerList[i].getId(),
-                cardList: this._playerList[i].getOutCardList()
-            })
-        }
-        for (let i = 0; i < this._playerList.length; i++) {
-            let target = this._playerList[i];
-            target.sendPlayerOutOneCardMessage({
-                playerOutCardList: playerOutCardList,
-                targetCard: this._currentOutCard,
-                outPlayerId: player.getId()
-            });
-        }
+        this.syncAllCardInfo();
         //将焦点设置到下一位玩家
         this.setFocusPlayer();
         // this._currentAskPlayerIndex = this._focusPlayerIndex + 1;
         //询问剩下 的所有的玩家 是否吃或者碰
     }
-
-    askPlayerOrEat(){
+    syncAllCardInfo() {
+        let playerActivedCardList = [];
+        for (let i = 0; i < this._playerList.length; i++) {
+            playerActivedCardList.push({
+                id: this._playerList[i].getId(),
+                outCardList: this._playerList[i].getOutCardList(),
+                lockedCardList: this._playerList[i].getLockedCard()
+            })
+        }
+        for (let i = 0; i < this._playerList.length; i++) {
+            let target = this._playerList[i];
+            target.sendSyncAllPlayerCardInfoMessage({
+                playerActivedCardList: playerActivedCardList,
+                targetCard: this._currentOutCard,
+                outPlayerId: this._currentOutCardPlayerId
+            });
+        }
+    }
+    askPlayerOrEat() {
         //询问玩家可以吃跟碰么。
     }
     playerEnterGameLayer(player) {
@@ -176,16 +179,9 @@ class Room {
             this.syncAllPlayerInfo();
         });
     }
-    playerEatCard(target){
-        // let allCardData = [];
-        // for (let i = 0 ; i < this._playerList.length ; i ++){
-        //     allCardData.push(this._playerList[i].getAllCardData());
-        // }
-        let eatedCardList = target.getEatedCardData();
-        for (let i = 0 ; i < this._playerList.length ; i ++){
-            let player = this._playerList[i];
-            player.sendPlayerEatCardMessage(target);
-        }
+    playerEatCard(target) {
+        // this.sendSyncAllPlayerCardInfoMessage();
+        this.syncAllCardInfo();
     }
     syncAllPlayerInfo() {
         let playerInfoList = this.getAllPlayerInfo();

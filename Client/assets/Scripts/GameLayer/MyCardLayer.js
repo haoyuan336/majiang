@@ -10,14 +10,14 @@ cc.Class({
     onLoad() {
         this._cardDataQuene = [];
         this._cardNodeList = [];
+        this._activeedCardNodeList = [];
         // this._outCardNodeList = [];
         this._currentOutCardList = [];
         this.node.on("push-card", (data) => {
             console.log("push card", data);
             this._cardDataQuene.push(data);
         });
-        this.node.on("update-out-card-info", (data, currentCard) => {
-            let cardList = data.cardList;
+        this.node.on("update-out-card-info", (cardList, currentCard) => {
             let count = cardList.length - this._currentOutCardList.length;
             console.log("count", count);
             if (count > 0) {
@@ -35,7 +35,7 @@ cc.Class({
                 }
             }
         });
-        this.node.on("show-can-interactive-card", (cardData) => {
+        this.node.on("card-up-with-list", (cardData) => {
             //显示可以交互的牌
             // this.eatButton.active = true;
             // let showCardListIndex = 0;
@@ -43,7 +43,7 @@ cc.Class({
             console.log("card data", cardData);
             for (let i = 0; i < this._cardNodeList.length; i++) {
                 let node = this._cardNodeList[i];
-                console.log("node", node);
+                // console.log("node", node);
                 for (let j = 0; j < cardData.length; j++) {
                     let id = node.getComponent('Card').getId();
                     console.log("id = ", id);
@@ -53,6 +53,18 @@ cc.Class({
                     }
                 }
 
+            }
+        });
+        this.node.on("show-card-list-value", (data)=>{
+            let id = data.id;
+            if (id === global.controller.getId()){
+                let cardList = data.cardList;
+                for (let i = 0 ; i < cardList.length ; i ++){
+                    let card = cardList[i];
+                    console.log("card", card);
+                    // let node = cc.instantiate(this.cardPrefab);
+                    // node.parent = this.node;
+                }
             }
         });
     },

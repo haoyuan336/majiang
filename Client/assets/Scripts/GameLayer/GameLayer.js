@@ -37,8 +37,9 @@ cc.Class({
         global.socketController.onPushCard = this.showCards.bind(this);
         global.socketController.onUpdateCardCount = this.updateCardCount.bind(this);
         global.socketController.onSyncFocusPlayerId = this.syncFocusePlayerId.bind(this);
-        global.socketController.onSyncAllPlayerOutCardList = this.syncAllPlayerOutCardList.bind(this);
+        global.socketController.onSyncAllPlayerCardList = this.syncAllPlayerCardList.bind(this);
         global.socketController.onSyncSelfCardList = this.syncSelfCardList.bind(this);
+        global.socketController.onPlayerEatCard = this.playerEatedCard.bind(this);
         this.myCardLayer = cc.instantiate(this.myCardLayerPrefab);
         this.myCardLayer.parent = this.node;
         this.myCardLayer.scale = 0.7;
@@ -88,6 +89,10 @@ cc.Class({
 
         // this.myCardLayer.emit("")
     },
+    playerEatedCard(data){
+        console.log("玩家吃了一张牌", data);
+        this.myCardLayer.emit("show-card-list-value",data);
+    },
     syncSelfCardList(data) {
         this._cardList = data;
 
@@ -99,24 +104,25 @@ cc.Class({
             this.processNextEvent();
         }
     },
-    syncAllPlayerOutCardList(data) {
+    syncAllPlayerCardList(data) {
         //同步所有玩家已经打出去的牌
-        let cardList = data.playerOutCardList;
+        let activedCardInfo = data.playerActivedCardList;
         let currentCard = data.targetCard;
         this._currentOutCard = currentCard;
         let outPlayerId = data.outPlayerId;
         this._currentOutPlayerId = outPlayerId; //当前出牌的玩家
-        console.log("card list", cardList);
+        console.log("card list", activedCardInfo);
         console.log("current card", currentCard);
         //同步其他玩家打的牌
-
-        for (let i = 0 ; i < this._playerNodeList.length ; i ++){
-            this._playerNodeList[i].emit("refer-out-card-data", cardList);
-        }
         let myData = undefined;
-        for (let i = 0; i < cardList.length; i++) {
-            if (global.controller.getId() == cardList[i].id) {
-                myData = cardList[i];
+        // let outCardList = activedCardInfo.outCardList;
+        for (let i = 0 ; i < this._playerNodeList.length ; i ++){
+            this._playerNodeList[i].emit("refer-out-card-data", activedCardInfo);
+        }
+      
+        for (let i = 0; i < activedCardInfo.length; i++) {
+            if (global.controller.getId() == activedCardInfo[i].id) {
+                myData = activedCardInfo[i].outCardList;
             }
         }
         console.log("my data", myData);
@@ -163,6 +169,7 @@ cc.Class({
         this.eatButton.active = true;
         this.getCardButton.active = true;
         this.myCardLayer.emit("card-up-with-list", eatResult[this._canActiveCardsListIndex]);
+        
     },
     checkCardResult() {
         //检查牌的结果

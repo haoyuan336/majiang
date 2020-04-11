@@ -44,6 +44,9 @@ class SocketController {
     onSyncSelfCardList(data) {
         console.warn("on sync self card list", data);
     }
+    onPlayerEatCard(data){
+        console.warn("on player eat card", data);
+    }
     processMessage(spec) {
         console.log("处理消息", spec);
         let type = spec.type;
@@ -75,12 +78,15 @@ class SocketController {
             case 'sync-focus-player-id':
                 this.onSyncFocusPlayerId(data);
                 break;
-            case 'sync-all-player-out-card-list':
-                this.onSyncAllPlayerOutCardList(data);
+            case 'sync-all-player-card-list':
+                this.onSyncAllPlayerCardList(data);
                 break;
             case 'sync-self-card-list':
                 this.onSyncSelfCardList(data);
                 break;
+            case 'player-eat-card':
+                this.onPlayerEatCard(data);
+                break;    
             default:
                 break
         }

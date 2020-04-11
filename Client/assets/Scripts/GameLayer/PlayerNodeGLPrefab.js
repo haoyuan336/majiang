@@ -50,7 +50,7 @@ cc.Class({
             for (let i = 0; i < cardList.length; i++) {
                 let cardData = cardList[i];
                 if (cardData.id === this._id && this._id !== global.controller.getId()) {
-                    let cardList = cardData.cardList;
+                    let cardList = cardData.outCardList;
                     this.referOutCardListNode(cardList);
                 }
             }

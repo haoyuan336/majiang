@@ -16,7 +16,8 @@ class Player {
         this._roomCardCount = 0;
         this._isFocus = false;
         this._outCardList = [];
-        this._eatedCardList = [];
+        // this._eatedCardList = [];
+        this._lockedCardList = [];
         this._currentFoucsPlayerId = undefined;
         this._allPlayerOutCardInfo = undefined;
     }
@@ -219,7 +220,8 @@ class Player {
                             }
                         }
                     }
-                    this._eatedCardList = data;
+                    // this._eatedCardList = data;
+                    this._lockedCardList = this._lockedCardList.concat(data);
                     this._room.playerEatCard(this, data);
                 }else{
                     console.error("房间不存在了")
@@ -229,11 +231,14 @@ class Player {
                 break;
         }
     }
-    getEatedCardData(){
-        // for (let i = 0 ; i < this._cardList.length ; i ++){
+    // getEatedCardData(){
+    //     // for (let i = 0 ; i < this._cardList.length ; i ++){
             
-        // }
-        return this._eatedCardList;
+    //     // }
+    //     return this._eatedCardList;
+    // }
+    getLockedCard(){
+        return this._lockedCardList;
     }
     playerOutOneCardData(cardId) {
         console.log("需要一处的牌 id是", cardId);
@@ -286,14 +291,18 @@ class Player {
     getIsHouseMaster() {
         return this._isHouseMaster;
     }
-    sendPlayerOutOneCardMessage(data) {
+    sendSyncAllPlayerCardInfoMessage(data) {
         this._allPlayerOutCardInfo = data;
-        this.sendMessage("sync-all-player-out-card-list", data, 0);
+        this.sendMessage("sync-all-player-card-list", data, 0);
     }
+    // sendPlayerEatCardMessage(data){
+    //     this.sendMessage("player-eat-card", data, 0);
+    // }
     getOutCardList() {
         return this._outCardList;
     }
     sendMessage(type, data, callBackId) {
+        console.log("发送消息", type);
         let str = JSON.stringify({
             type: type,
             data: data,
