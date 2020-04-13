@@ -5,35 +5,48 @@ cc.Class({
 
     properties: {
         cardPrefab: cc.Prefab,
-       
+
     },
     onLoad() {
         this._cardDataQuene = [];
         this._cardNodeList = [];
-        this._activeedCardNodeList = [];
+        this._lockedCardNodeList = [];
+
         // this._outCardNodeList = [];
         this._currentOutCardList = [];
         this.node.on("push-card", (data) => {
             console.log("push card", data);
             this._cardDataQuene.push(data);
         });
-        this.node.on("update-out-card-info", (cardList, currentCard) => {
-            let count = cardList.length - this._currentOutCardList.length;
-            console.log("count", count);
+        this.node.on("refer-self-card-list", (cardList) => {
+            console.log("自己的牌的 长度是", cardList.length);
+            let count = cardList.length - this._cardNodeList.length;
             if (count > 0) {
                 for (let i = 0; i < count; i++) {
                     let node = cc.instantiate(this.cardPrefab);
                     node.parent = this.node;
-                    node.x = -430 + 70 * this._currentOutCardList.length;
-                    node.y = 120 + Math.floor((this._currentOutCardList.length / 10)) * 100;
-                    this._currentOutCardList.push(node);
                 }
-                for (let i = 0; i < this._currentOutCardList.length; i++) {
-                    let node = this._currentOutCardList[i];
-                    console.log("i", i);
-                    node.emit('init-data', cardList[i]);
+            } else {
+                for (let i = 0; i < Math.abs(count); i++) {
+                    let node = this._cardNodeList.pop();
+                    node.destroy();
                 }
             }
+            for (let i = 0; i < this._cardNodeList.length; i++) {
+                let node = this._cardNodeList[i];
+                node.emit('init-data', cardList[i]);
+                node.x = (13 - this._cardNodeList.length + i) * 70 - 500;
+            }
+            this.referCardNodePos();
+        });
+        this.node.on("update-public-card-info", (cardList, currentCard) => {
+
+
+            let lockedCardList = cardList.lockedCardList;
+            this.referLockCardNodeList(lockedCardList);
+            let cardOutList = cardList.outCardList;
+            this.referOutCardNodeList(cardOutList);
+
         });
         this.node.on("card-up-with-list", (cardData) => {
             //显示可以交互的牌
@@ -49,17 +62,17 @@ cc.Class({
                     console.log("id = ", id);
                     console.log("card data id", cardData[j]._id);
                     if (id === cardData[j]._id) {
-                        node.y = 20;
+                        node.y =  20;
                     }
                 }
 
             }
         });
-        this.node.on("show-card-list-value", (data)=>{
+        this.node.on("show-card-list-value", (data) => {
             let id = data.id;
-            if (id === global.controller.getId()){
+            if (id === global.controller.getId()) {
                 let cardList = data.cardList;
-                for (let i = 0 ; i < cardList.length ; i ++){
+                for (let i = 0; i < cardList.length; i++) {
                     let card = cardList[i];
                     console.log("card", card);
                     // let node = cc.instantiate(this.cardPrefab);
@@ -71,7 +84,40 @@ cc.Class({
     start() {
         this._addOneCardTime = 0;
     },
-  
+    referSelfCardNode(cardList) {
+
+    },
+    referLockCardNodeList(cardList) {
+        let count = cardList.length - this._lockedCardNodeList.length;
+        if (count > 0) {
+            for (let i = 0; i < count; i++) {
+                let card = cc.instantiate(this.cardPrefab);
+                card.parent = this.node;
+                card.emit("init-data", cardList[i]);
+                card.x = this._lockedCardNodeList.length * 70 - 500;
+                card.y = -20;
+                this._lockedCardNodeList.push(card);
+            }
+        }
+    },
+    referOutCardNodeList(cardOutList) {
+        let count = cardOutList.length - this._currentOutCardList.length;
+        console.log("count", count);
+        if (count > 0) {
+            for (let i = 0; i < count; i++) {
+                let node = cc.instantiate(this.cardPrefab);
+                node.parent = this.node;
+                node.x = -430 + 70 * this._currentOutCardList.length;
+                node.y = 120 + Math.floor((this._currentOutCardList.length / 10)) * 100;
+                this._currentOutCardList.push(node);
+            }
+            for (let i = 0; i < this._currentOutCardList.length; i++) {
+                let node = this._currentOutCardList[i];
+                console.log("i", i);
+                node.emit('init-data', cardOutList[i]);
+            }
+        }
+    },
     referCardNodePos() {
         console.log("刷新牌的位置");
         this._cardNodeList = this._cardNodeList.sort((a, b) => {
@@ -118,13 +164,16 @@ cc.Class({
                 convertList.push(node);
             }
         }
+
+        let offsetIndex = 14 - convertList.length;
         for (let i = 0; i < convertList.length; i++) {
             let node = convertList[i];
+
             if (i === 13) {
-                node.runAction(cc.moveTo(0.1, (i + 1) * 70 - 500 + 30, 0));
+                node.runAction(cc.moveTo(0.1, (i + offsetIndex) * 70 - 500 + 30, 0));
 
             } else {
-                node.runAction(cc.moveTo(0.1, (i + 1) * 70 - 500, 0));
+                node.runAction(cc.moveTo(0.1, (i + offsetIndex) * 70 - 500, 0));
             }
         }
         this._cardNodeList = convertList;
@@ -140,15 +189,15 @@ cc.Class({
         card.on("click", () => {
             let id = card.getComponent('Card').getId();
             this.node.emit("player-click-card-node", id, () => {
-                for (let i = 0; i < this._cardNodeList.length; i++) {
-                    let target = this._cardNodeList[i].getComponent("Card");
-                    if (target.getId() === id) {
-                        this._cardNodeList.splice(i, 1);
-                        break;
-                    }
-                }
-                this.referCardNodePos();
-                card.destroy();
+                // for (let i = 0; i < this._cardNodeList.length; i++) {
+                //     let target = this._cardNodeList[i].getComponent("Card");
+                //     if (target.getId() === id) {
+                //         this._cardNodeList.splice(i, 1);
+                //         break;
+                //     }
+                // }
+                // this.referCardNodePos();
+                // card.destroy();
 
             });
             // console.log("click w", index);
@@ -162,7 +211,7 @@ cc.Class({
                 let data = this._cardDataQuene.shift();
                 let card = this.addOneCardNode(data, this._cardNodeList.length);
                 this._cardNodeList.push(card);
-                card.x = this._cardNodeList.length * 70 - 500;
+                card.x =  this._cardNodeList.length * 70 - 500;
                 if (this._cardDataQuene.length === 0) {
                     this.referCardNodePos();
                 }

@@ -22,6 +22,7 @@ class Room {
         this._focusPlayerIndex = undefined;
         this._currentOutCard = {};//当前被打出来的牌
         this._currentOutCardPlayerId = 0; //当前打出去牌的玩家
+        this._allPlayerCardList = {};//所有玩家的牌的列表
     }
     startGame() {
         console.log("开始游戏");
@@ -41,6 +42,9 @@ class Room {
         this.updateCardCount();
         this.setFocusPlayer();
 
+    }
+    getAllPlayerCardInfo(){
+        return this._allPlayerCardList;
     }
     setFocusPlayer() {
         //设置焦点玩家
@@ -63,10 +67,11 @@ class Room {
         this._playerList[this._focusPlayerIndex].setFocus(true);
         // this.syncAllPlayerInfo();
 
-        for (let i = 0; i < this._playerList.length; i++) {
-            let player = this._playerList[i];
-            player.sendSyncFocusPlayerMessage(this._playerList[this._focusPlayerIndex].getId());
-        }
+        // for (let i = 0; i < this._playerList.length; i++) {
+        //     let player = this._playerList[i];
+        //     player.setCurrentFocusPlayer(this._playerList[this._focusPlayerIndex].getId());
+        // }
+        this._allPlayerCardList['focusPlayerId'] = this._playerList[this._focusPlayerIndex].getId()
     }
     getOneCardData(player) {
         if (this._onePackCards.length > 0) {
@@ -127,9 +132,10 @@ class Room {
         this._currentOutCardPlayerId = player.getId();
         this._currentOutCard = player.playerOutOneCardData(cardId);
         //广播一下
+        this.setFocusPlayer();
+
         this.syncAllCardInfo();
         //将焦点设置到下一位玩家
-        this.setFocusPlayer();
         // this._currentAskPlayerIndex = this._focusPlayerIndex + 1;
         //询问剩下 的所有的玩家 是否吃或者碰
     }
@@ -142,18 +148,20 @@ class Room {
                 lockedCardList: this._playerList[i].getLockedCard()
             })
         }
+        this._allPlayerCardList = {
+            playerActivedCardList: playerActivedCardList,
+            targetCard: this._currentOutCard,
+            outPlayerId: this._currentOutCardPlayerId,
+            focusPlayerId: this._playerList[this._focusPlayerIndex].getId()
+        }
         for (let i = 0; i < this._playerList.length; i++) {
             let target = this._playerList[i];
-            target.sendSyncAllPlayerCardInfoMessage({
-                playerActivedCardList: playerActivedCardList,
-                targetCard: this._currentOutCard,
-                outPlayerId: this._currentOutCardPlayerId
-            });
+            target.sendSyncAllPlayerCardInfoMessage(this._allPlayerCardList);
         }
     }
-    askPlayerOrEat() {
-        //询问玩家可以吃跟碰么。
-    }
+    // askPlayerOrEat() {
+    //     //询问玩家可以吃跟碰么。
+    // }
     playerEnterGameLayer(player) {
         let isHave = false;
         for (let i = 0; i < this._playerList.length; i++) {

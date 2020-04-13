@@ -36,7 +36,7 @@ cc.Class({
         global.socketController.onSyncState = this.syncState.bind(this);
         global.socketController.onPushCard = this.showCards.bind(this);
         global.socketController.onUpdateCardCount = this.updateCardCount.bind(this);
-        global.socketController.onSyncFocusPlayerId = this.syncFocusePlayerId.bind(this);
+        // global.socketController.onSyncFocusPlayerId = this.syncFocusePlayerId.bind(this);
         global.socketController.onSyncAllPlayerCardList = this.syncAllPlayerCardList.bind(this);
         global.socketController.onSyncSelfCardList = this.syncSelfCardList.bind(this);
         global.socketController.onPlayerEatCard = this.playerEatedCard.bind(this);
@@ -72,7 +72,7 @@ cc.Class({
         }
     },
     showCards(data) {
-        console.log("显示牌", data);
+        // console.log("显示牌", data);
         let cardList = data.cardList;
         this._cardList = cardList;
         for (let i = 0; i < cardList.length; i++) {
@@ -95,15 +95,15 @@ cc.Class({
     },
     syncSelfCardList(data) {
         this._cardList = data;
-
+        this.myCardLayer.emit("refer-self-card-list", this._cardList);
     },
-    syncFocusePlayerId(id) {
-        // this._currentFocusPlayerId = id;
-        global.controller.setCurrentFocusPlayerId(id);
-        if (id === global.controller.getId()) {
-            this.processNextEvent();
-        }
-    },
+    // syncFocusePlayerId(id) {
+    //     // this._currentFocusPlayerId = id;
+    //     global.controller.setCurrentFocusPlayerId(id);
+    //     if (id === global.controller.getId()) {
+    //         this.processNextEvent();
+    //     }
+    // },
     syncAllPlayerCardList(data) {
         //同步所有玩家已经打出去的牌
         let activedCardInfo = data.playerActivedCardList;
@@ -113,20 +113,27 @@ cc.Class({
         this._currentOutPlayerId = outPlayerId; //当前出牌的玩家
         console.log("card list", activedCardInfo);
         console.log("current card", currentCard);
+        //取出当前的焦点玩家
+        let focusPlayerId = data.focusPlayerId;
+        global.controller.setCurrentFocusPlayerId(focusPlayerId);
         //同步其他玩家打的牌
         let myData = undefined;
         // let outCardList = activedCardInfo.outCardList;
         for (let i = 0 ; i < this._playerNodeList.length ; i ++){
             this._playerNodeList[i].emit("refer-out-card-data", activedCardInfo);
         }
-      
         for (let i = 0; i < activedCardInfo.length; i++) {
             if (global.controller.getId() == activedCardInfo[i].id) {
-                myData = activedCardInfo[i].outCardList;
+                // myData = activedCardInfo[i].outCardList;
+                myData = activedCardInfo[i];
             }
         }
         console.log("my data", myData);
-        this.myCardLayer.emit("update-out-card-info", myData, currentCard);
+        this.myCardLayer.emit("update-public-card-info", myData, currentCard);
+        if (focusPlayerId === global.controller.getId()){
+            // this.processNextEvent();
+            console.log("处理下一步操作");
+        }
     },
     getOneCard() {
         console.log("获取一张牌");
@@ -136,7 +143,7 @@ cc.Class({
                 global.socketController.sendGetOneCard().then((data) => {
                     console.log("获取一张牌", data);
                     this._cardList.push(data);
-                    this.myCardLayer.emit('push-card', data);
+                    // this.myCardLayer.emit('push-card', data);
                     resole();
                 });
             }

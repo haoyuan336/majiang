@@ -20,6 +20,7 @@ class Player {
         this._lockedCardList = [];
         this._currentFoucsPlayerId = undefined;
         this._allPlayerOutCardInfo = undefined;
+        
     }
     setFocus(value) {
         this._isFocus = value;
@@ -156,17 +157,19 @@ class Player {
                     }).catch((err) => {
                         this.sendMessage("enter-fail", { err: err }, callBackId);
                     });
+                    console.log("card list", this._cardList.length);
                     if (this._cardList.length !== 0) {
                         this.sendMessage("push-card", {
                             cardList: this._cardList,
                             roomCardCount: this._roomCardCount
                         }, 0);
                     }
-                    if (this._currentFoucsPlayerId !== undefined) {
-                        this.sendMessage('sync-focus-player-id', this._currentFoucsPlayerId, 0);
-                    }
+                    // if (this._currentFoucsPlayerId !== undefined) {
+                    //     this.sendMessage('sync-focus-player-id', this._currentFoucsPlayerId, 0);
+                    // }
                     if (this._allPlayerOutCardInfo !== undefined) {
-                        this.sendMessage("sync-all-player-out-card-list", this._allPlayerOutCardInfo, 0);
+                        let allPlayerCardInfo = this._room.getAllPlayerCardInfo();
+                        this.sendMessage("sync-all-player-card-list", allPlayerCardInfo, 0);
                     }
                     // if (this._outCardList.length !== 0){
                     //     this.sendMessage("sync-out-cardlist", {})
@@ -209,21 +212,23 @@ class Player {
                 }
                 break;
             case 'eat-card':
-                console.log("玩家发来了吃牌的消息");
-                if (this._room){
+                console.log("玩家发来了吃牌的消息", JSON.stringify(this._cardList));
+                if (this._room) {
                     //根据发来的数据，将牌从自己的列表里面清除
-                    for (let i = 0 ; i < this._cardList.length ; i++){
-                        for (let j = 0 ; j < data.length ; j ++){
-                            if (this._cardList[i]._id === data[j]._id){
+                    for (let i = 0; i < this._cardList.length; i++) {
+                        for (let j = 0; j < data.length; j++) {
+                            if (this._cardList[i]._id === data[j]._id) {
                                 this._cardList.splice(i, 1);
-                                i --;
+                                i--;
                             }
                         }
                     }
                     // this._eatedCardList = data;
+                    console.log("玩家剩下的牌的列表长度是", this._cardList.length);
                     this._lockedCardList = this._lockedCardList.concat(data);
                     this._room.playerEatCard(this, data);
-                }else{
+                    this.sendMessage("sync-self-card-list", this._cardList, 0);
+                } else {
                     console.error("房间不存在了")
                 }
                 break;
@@ -233,11 +238,11 @@ class Player {
     }
     // getEatedCardData(){
     //     // for (let i = 0 ; i < this._cardList.length ; i ++){
-            
+
     //     // }
     //     return this._eatedCardList;
     // }
-    getLockedCard(){
+    getLockedCard() {
         return this._lockedCardList;
     }
     playerOutOneCardData(cardId) {
@@ -283,7 +288,7 @@ class Player {
     }
     sendSyncFocusPlayerMessage(id) {
         this._currentFoucsPlayerId = id;
-        this.sendMessage("sync-focus-player-id", id, 0);
+        // this.sendMessage("sync-focus-player-id", id, 0);
     }
     setHouseMaster(value) {
         this._isHouseMaster = value;
@@ -295,6 +300,9 @@ class Player {
         this._allPlayerOutCardInfo = data;
         this.sendMessage("sync-all-player-card-list", data, 0);
     }
+    // setCurrentFocusPlayer(value){
+
+    // }
     // sendPlayerEatCardMessage(data){
     //     this.sendMessage("player-eat-card", data, 0);
     // }
