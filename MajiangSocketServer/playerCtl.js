@@ -9,7 +9,7 @@ class PlayerCtl {
             console.log("有客户端发来消息", str);
             let msg = JSON.parse(str);
             let event = msg['event'];
-    
+            
     
         });
         socket.on("error", (err)=>{

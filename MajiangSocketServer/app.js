@@ -5,7 +5,7 @@ const playerCtl = require("./playerCtl");
 websocket.createServer((socket)=>{
     console.log("有客户端链接");
 
-    playerCtl.
+    playerCtl.socketContent(socket);
     
     
     
