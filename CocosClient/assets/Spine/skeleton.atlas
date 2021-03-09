@@ -1,0 +1,54 @@
+
+skeleton.png
+size: 1876,1928
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+weixing
+  rotate: false
+  xy: 2, 2
+  size: 52, 52
+  orig: 52, 52
+  offset: 0, 0
+  index: -1
+xingqiu
+  rotate: false
+  xy: 2, 56
+  size: 1872, 1870
+  orig: 1872, 1870
+  offset: 0, 0
+  index: -1
+
+skeleton2.png
+size: 1924,1864
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bg1
+  rotate: false
+  xy: 2, 780
+  size: 1920, 1080
+  orig: 1920, 1080
+  offset: 0, 0
+  index: -1
+liuixng
+  rotate: false
+  xy: 580, 316
+  size: 430, 260
+  orig: 430, 260
+  offset: 0, 0
+  index: -1
+xingqiu2
+  rotate: false
+  xy: 2, 578
+  size: 1920, 200
+  orig: 1920, 200
+  offset: 0, 0
+  index: -1
+xxingqiu
+  rotate: false
+  xy: 2, 2
+  size: 576, 574
+  orig: 576, 574
+  offset: 0, 0
+  index: -1
