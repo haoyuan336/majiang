@@ -5,7 +5,7 @@ enum EventType {
 }
 interface MsgInterface {
     eventType: string,
-    data: string,
+    data: object,
     callback: Function
 }
 export { EventType , MsgInterface};

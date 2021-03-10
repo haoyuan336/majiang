@@ -9,12 +9,12 @@ class NetworkInstance {
     static callbackIndex: number = 1;
 
     static ws: WebSocket;
-    static async loginSocketServer() {
+    static async loginSocketServer(uid) {
         //链接上长链接服务器
         await this.connectServer();
         this.sendMessage({
-            eventType: "Login",
-            data: "",
+            eventType: "login",
+            data: {uid: uid},
             callback: () => {
                 console.log("消息发送完成")
             }
